@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "reward-system",
+  "description": "Everything specific to the reward package hosts: package contract, C# and UI standards, UI-from-image, play-mode verification, Vietnamese docs, git release.",
+  "author": {
+    "name": "BMH"
+  },
+  "homepage": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "repository": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "license": "UNLICENSED",
+  "keywords": [
+    "unity",
+    "reward",
+    "package"
+  ]
+}

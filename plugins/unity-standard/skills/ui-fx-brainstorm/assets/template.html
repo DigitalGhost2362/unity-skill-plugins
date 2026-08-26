@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UI FX Options</title>
+<style>
+  :root{
+    --bg:#12141c; --card:#1b1e2b; --line:#2c3145; --txt:#e8ebf5; --dim:#8b93ad;
+    --a:#ffcc33; --b:#57d9a3; --c:#7aa8ff; --d:#ff7a90;
+    --gold:#ffcc33; --gem:#54d1ff; --stage:#0d0f16;
+  }
+  html[data-light]{ --bg:#eef0f6; --card:#fff; --line:#dfe3ee; --txt:#1a1d28; --dim:#6b7288; --stage:#f4f6fb; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+         padding:14px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;
+         background:var(--bg);z-index:10}
+  h1{font-size:15px;margin:0;font-weight:650;letter-spacing:.2px}
+  h1 small{color:var(--dim);font-weight:400;margin-left:8px}
+  .spacer{flex:1}
+  button,label.ctl{background:var(--card);color:var(--txt);border:1px solid var(--line);
+    border-radius:8px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:7px}
+  button:hover{border-color:var(--dim)}
+  input[type=range]{width:110px;accent-color:var(--a)}
+  main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:18px 20px 40px}
+  @media (max-width:900px){ main{grid-template-columns:1fr} }
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+        display:flex;flex-direction:column}
+  .hd{display:flex;align-items:flex-start;gap:11px;padding:13px 15px 11px}
+  .key{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+       font-weight:800;font-size:14px;color:#14161f;flex:none}
+  .card[data-k=A] .key{background:var(--a)} .card[data-k=B] .key{background:var(--b)}
+  .card[data-k=C] .key{background:var(--c)} .card[data-k=D] .key{background:var(--d)}
+  .name{font-weight:650;font-size:14.5px}
+  .desc{color:var(--dim);font-size:12.5px;margin-top:2px}
+  .stage{position:relative;height:280px;margin:0 15px;border-radius:10px;
+         background:var(--stage);overflow:hidden;
+         background-image:radial-gradient(circle at 50% 45%,rgba(255,255,255,.05),transparent 65%)}
+  .ft{display:flex;align-items:center;gap:10px;padding:11px 15px 13px}
+  .unity{flex:1;min-width:0;color:var(--dim);font:11.5px/1.4 ui-monospace,Consolas,monospace;
+         white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ft button{padding:5px 11px;font-size:12.5px;flex:none}
+
+  /* ---- mock element styles (used by the H.* helpers) ---- */
+  /* .m is centred by its transform, so every animation MUST keep translate(-50%,-50%) in
+     its transform keyframes. Never use the standalone `scale`/`translate` properties on
+     .m elements — they compose before transform and drift the centring. */
+  .m{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);will-change:transform,opacity}
+  .m-panel{width:280px;height:172px;border-radius:18px;
+    background:linear-gradient(180deg,#49527a,#262c46);
+    border:3px solid #8c97c8;box-shadow:0 10px 26px rgba(0,0,0,.45)}
+  .m-panel .bar{position:absolute;left:50%;transform:translate(-50%,0);top:-16px;width:190px;height:38px;
+    border-radius:10px;background:linear-gradient(180deg,#ffd75e,#f0a326);border:3px solid #fff3c4;
+    display:grid;place-items:center;font-weight:800;color:#6b3b06;font-size:13px;letter-spacing:.5px}
+  .m-panel .body{position:absolute;inset:34px 16px 56px;border-radius:12px;background:rgba(0,0,0,.28)}
+  .m-btn{width:126px;height:44px;border-radius:12px;font-weight:800;color:#123;
+    display:grid;place-items:center;letter-spacing:.4px;font-size:14px;
+    background:linear-gradient(180deg,#7ce2a4,#2fa96a);border:3px solid #d5ffe6;
+    box-shadow:0 5px 0 #1d7a4b}
+  .m-pill{width:118px;height:36px;border-radius:18px;background:#1d2236;border:2px solid #59628c;
+    display:flex;align-items:center;gap:8px;padding:0 10px;font-weight:700;font-size:14px;color:#fff}
+  .m-coin{width:24px;height:24px;border-radius:50%;flex:none;
+    background:radial-gradient(circle at 35% 30%,#ffe89a,#f3a81c);border:2px solid #ffeaa8}
+  .m-card{width:96px;height:124px;border-radius:12px;background:linear-gradient(180deg,#5b6398,#2b3050);
+    border:3px solid #aab3e0;display:grid;place-items:center}
+  .m-card i{width:46px;height:46px;border-radius:10px;background:linear-gradient(180deg,#ffd75e,#e8871c)}
+  /* opacity:0 base + fill:'forwards' on the burst — with fill:'both' a delayed particle
+     paints its first keyframe during the delay, so all N sit visible on the emitter. */
+  .p{position:absolute;border-radius:50%;pointer-events:none;opacity:0;will-change:transform,opacity}
+</style>
+</head>
+<body>
+<header>
+  <h1>UI FX Options <small id="subject">— subject / moment</small></h1>
+  <div class="spacer"></div>
+  <label class="ctl">speed <input type="range" id="speed" min="20" max="150" value="100" step="5"><b id="speedv">1.00x</b></label>
+  <label class="ctl"><input type="checkbox" id="loop" checked> loop</label>
+  <button id="theme">light</button>
+  <button id="all">▶ replay all</button>
+</header>
+<main id="grid"></main>
+
+<script>
+/* ============================================================
+   HARNESS — do not edit. Replace only the EFFECTS array below.
+   ============================================================ */
+let SPEED = 1;
+const H = {
+  EASE: {
+    linear:'linear',
+    outQuad:'cubic-bezier(.5,1,.89,1)',
+    outCubic:'cubic-bezier(.33,1,.68,1)',
+    outQuart:'cubic-bezier(.25,1,.5,1)',
+    outExpo:'cubic-bezier(.16,1,.3,1)',
+    inOutCubic:'cubic-bezier(.65,0,.35,1)',
+    outBack:'cubic-bezier(.34,1.56,.64,1)',
+    inBack:'cubic-bezier(.36,0,.66,-.56)',
+    inQuad:'cubic-bezier(.11,0,.5,0)',
+    /* Elastic/Bounce have no bezier form — use these as keyframe offsets instead. */
+    elasticOut:(from,to)=>[
+      {transform:`scale(${from})`,offset:0},{transform:`scale(${to*1.22})`,offset:.32},
+      {transform:`scale(${to*.9})`,offset:.52},{transform:`scale(${to*1.06})`,offset:.72},
+      {transform:`scale(${to*.98})`,offset:.86},{transform:`scale(${to})`,offset:1}],
+    bounceOut:(dist)=>[
+      {transform:`translateY(${-dist}px)`,offset:0},{transform:'translateY(0)',offset:.45},
+      {transform:`translateY(${-dist*.22}px)`,offset:.62},{transform:'translateY(0)',offset:.78},
+      {transform:`translateY(${-dist*.07}px)`,offset:.9},{transform:'translateY(0)',offset:1}],
+  },
+
+  /* create an element: H.el('div','m m-panel','<b>hi</b>') */
+  el(tag,cls,html){ const e=document.createElement(tag); if(cls)e.className=cls;
+                    if(html!=null)e.innerHTML=html; return e; },
+
+  /* WAAPI wrapper — respects the speed slider. ALWAYS use this, never setTimeout.
+     Default easing is linear on purpose: a timing-level easing would compose on top of
+     per-keyframe `easing:` and silently distort multi-beat keyframe lists. Pass easing
+     explicitly for single-segment animations. */
+  anim(el,frames,opts={}){
+    const a = el.animate(frames, Object.assign({duration:300,fill:'both',easing:'linear'},opts));
+    a.playbackRate = SPEED; return a;
+  },
+
+  /* same animation on many elements, offset by `step` ms */
+  stagger(els,frames,opts={},step=60){
+    return [...els].map((e,i)=>H.anim(e,frames,Object.assign({},opts,{delay:(opts.delay||0)+i*step})));
+  },
+
+  /* radial particle burst. H.burst(stage,{x,y,n:14,color:'#ffcc33'}) */
+  burst(stage,o={}){
+    const {x=140,y=140,n=14,color='#ffcc33',dist=110,size=9,dur=650,delay=0,spread=Math.PI*2}=o;
+    const base = spread<6.2 ? -Math.PI/2-spread/2 : 0;
+    for(let i=0;i<n;i++){
+      const p=H.el('div','p'); const ang=base+spread*(i/n);
+      const d=dist*(.55+Math.random()*.65), s=size*(.6+Math.random()*.8);
+      p.style.cssText+=`left:${x}px;top:${y}px;width:${s}px;height:${s}px;background:${color};margin:${-s/2}px 0 0 ${-s/2}px`;
+      stage.appendChild(p);
+      H.anim(p,[{transform:'translate(0,0) scale(1)',opacity:1},
+                {transform:`translate(${Math.cos(ang)*d}px,${Math.sin(ang)*d+d*.25}px) scale(.2)`,opacity:0}],
+              {duration:dur*(.7+Math.random()*.5),delay,fill:'forwards',easing:H.EASE.outQuart});
+    }
+  },
+
+  shake(el,o={}){
+    const {amp=10,times=5,duration=320,delay=0}=o, f=[];
+    for(let i=0;i<=times;i++) f.push({transform:`translateX(${i===times?0:(i%2?-1:1)*amp*(1-i/times)}px)`});
+    return H.anim(el,f,{duration,delay,easing:'linear'});
+  },
+
+  /* white full-stage flash */
+  flash(stage,o={}){
+    const f=H.el('div'); f.style.cssText='position:absolute;inset:0;background:#fff;opacity:0';
+    stage.appendChild(f);
+    return H.anim(f,[{opacity:0},{opacity:o.peak??.75},{opacity:0}],
+                  {duration:o.duration??220,delay:o.delay??0,easing:'linear'});
+  },
+
+  /* ---- mock game-UI subjects ---- */
+  panel(title='REWARD'){ const e=H.el('div','m m-panel',
+      `<div class="bar">${title}</div><div class="body"></div>`); return e; },
+  button(label='CLAIM'){ return H.el('div','m m-btn',label); },
+  pill(v='1,250'){ return H.el('div','m m-pill',`<div class="m-coin"></div><span>${v}</span>`); },
+  card(){ return H.el('div','m m-card','<i></i>'); },
+
+  /* place a .m element at an offset from stage centre */
+  at(el,dx=0,dy=0){ el.style.marginLeft=dx+'px'; el.style.marginTop=dy+'px'; return el; },
+};
+
+/* ============================================================
+   EFFECTS — REPLACE THIS ARRAY. Keep exactly 4 entries: A B C D.
+   Each must differ in its PRIMARY MOTION VERB, not just its easing.
+   `unity` is the implementation spec — write it before the HTML.
+   ============================================================ */
+const SUBJECT = 'Reward popup — open';
+
+const EFFECTS = [
+{
+  key:'A', name:'Pop & Settle', cycle:1700,
+  desc:'Board scales up past 1 and settles. Calm, reads instantly, safest default.',
+  unity:'cg.DOFade(1,.12f); board.DOScale(1f,.32f).SetEase(Ease.OutBack,1.7f)',
+  render(stage,H){
+    const p = H.panel('REWARD'); stage.appendChild(p);
+    H.anim(p,[{transform:'translate(-50%,-50%) scale(.4)',opacity:0},
+              {transform:'translate(-50%,-50%) scale(1)',opacity:1}],
+           {duration:320,easing:H.EASE.outBack});
+    H.anim(p.querySelector('.bar'),[{transform:'translate(-50%,-14px) scale(.6)',opacity:0},
+                                    {transform:'translate(-50%,0) scale(1)',opacity:1}],
+           {duration:280,delay:140,easing:H.EASE.outBack});
+  }
+},
+{
+  key:'B', name:'Drop & Impact', cycle:2000,
+  desc:'Board falls in, squashes on landing, shakes the frame and throws dust.',
+  unity:'Sequence: DOAnchorPosY(0,.28).SetEase(OutQuad) → DOScale(1.1,.9,.07) → DOScale(1,.12,OutBack) + UIParticle dust  [sfx: impact]',
+  render(stage,H){
+    const p = H.panel('REWARD'); stage.appendChild(p);
+    H.anim(p,[
+      {transform:'translate(-50%,-330px) scale(1,1)',offset:0,easing:H.EASE.inQuad},
+      {transform:'translate(-50%,-50%) scale(1,1)',offset:.46,easing:H.EASE.outQuad},
+      {transform:'translate(-50%,-50%) scale(1.16,.82)',offset:.56},
+      {transform:'translate(-50%,-50%) scale(.95,1.06)',offset:.72},
+      {transform:'translate(-50%,-50%) scale(1.02,.98)',offset:.86},
+      {transform:'translate(-50%,-50%) scale(1,1)',offset:1}],
+      {duration:565});
+    H.burst(stage,{x:stage.clientWidth/2,y:stage.clientHeight/2+86,n:12,color:'#c9cfe6',
+                   dist:90,size:7,dur:420,delay:262,spread:Math.PI});
+    H.shake(stage,{amp:7,times:5,duration:240,delay:262});
+  }
+},
+{
+  key:'C', name:'Unfold', cycle:2100,
+  desc:'Board opens from a horizontal line, contents fade up staggered. Elegant, no bounce.',
+  unity:'board.DOScaleY(1,.30).SetEase(OutExpo) then rows DOFade+DOAnchorPosY staggered .05f',
+  render(stage,H){
+    const p = H.panel('REWARD'); stage.appendChild(p);
+    H.anim(p,[{transform:'translate(-50%,-50%) scale(1,.02)',opacity:.4},
+              {transform:'translate(-50%,-50%) scale(1,1)',opacity:1}],
+           {duration:300,easing:H.EASE.outExpo});
+    const cards=[-70,0,70].map(dx=>{const c=H.at(H.card(),dx,6);
+      c.style.width='72px';c.style.height='94px';stage.appendChild(c);return c;});
+    H.stagger(cards,[{transform:'translate(-50%,-30%) scale(.8)',opacity:0},
+                     {transform:'translate(-50%,-50%) scale(1)',opacity:1}],
+              {duration:260,delay:250,easing:H.EASE.outCubic},70);
+  }
+},
+{
+  key:'D', name:'Flash Slam', cycle:2200,
+  desc:'Overshoot slam from oversized + white flash + gold burst. Loudest, save it for rare rewards.',
+  unity:'board.localScale=1.75f; DOScale(1,.22).SetEase(OutQuart) + flashImg.DOFade(.8→0,.24) + UIParticle gold burst  [sfx: hit]',
+  render(stage,H){
+    const p = H.panel('LEGENDARY'); stage.appendChild(p);
+    H.anim(p,[{transform:'translate(-50%,-50%) scale(1.75) rotate(-6deg)',opacity:0},
+              {transform:'translate(-50%,-50%) scale(1) rotate(0deg)',opacity:1}],
+           {duration:220,easing:H.EASE.outQuart});
+    H.flash(stage,{peak:.8,duration:240,delay:180});
+    H.burst(stage,{x:stage.clientWidth/2,y:stage.clientHeight/2,n:20,color:'#ffcc33',
+                   dist:150,size:10,dur:750,delay:200});
+    H.anim(p,[{filter:'brightness(3)'},{filter:'brightness(1)'}],{duration:340,delay:200,easing:H.EASE.outQuad});
+  }
+},
+];
+
+/* ============================================================
+   runtime
+   ============================================================ */
+const grid=document.getElementById('grid'), cards=[];
+document.getElementById('subject').textContent='— '+SUBJECT;
+
+for(const fx of EFFECTS){
+  const c=H.el('div','card'); c.dataset.k=fx.key;
+  c.innerHTML=`<div class="hd"><div class="key">${fx.key}</div>
+      <div><div class="name">${fx.name}</div><div class="desc">${fx.desc}</div></div></div>
+    <div class="stage"></div>
+    <div class="ft"><div class="unity" title="${fx.unity.replace(/"/g,'&quot;')}">${fx.unity}</div>
+      <button>replay</button></div>`;
+  grid.appendChild(c);
+  const rec={fx,stage:c.querySelector('.stage'),timer:0};
+  c.querySelector('.ft button').onclick=()=>play(rec);
+  rec.stage.onclick=()=>play(rec);
+  cards.push(rec);
+}
+
+function play(rec){
+  clearTimeout(rec.timer);
+  rec.stage.getAnimations({subtree:true}).forEach(a=>a.cancel());
+  rec.stage.innerHTML='';
+  rec.fx.render(rec.stage,H);
+  requestAnimationFrame(()=>rec.stage.getAnimations({subtree:true})
+    .forEach(a=>{ if(a.playbackRate!==SPEED) a.playbackRate=SPEED; }));
+  if(document.getElementById('loop').checked)
+    rec.timer=setTimeout(()=>play(rec),(rec.fx.cycle||1800)/SPEED);
+}
+const playAll=()=>cards.forEach(play);
+
+document.getElementById('all').onclick=playAll;
+document.getElementById('loop').onchange=playAll;
+document.getElementById('speed').oninput=e=>{
+  SPEED=e.target.value/100;
+  document.getElementById('speedv').textContent=SPEED.toFixed(2)+'x';
+  playAll();
+};
+document.getElementById('theme').onclick=e=>{
+  const light=document.documentElement.toggleAttribute('data-light');
+  e.target.textContent=light?'dark':'light';
+};
+addEventListener('keydown',e=>{
+  const i='abcd'.indexOf(e.key.toLowerCase());
+  if(i>=0&&cards[i]) play(cards[i]);
+  if(e.key===' '){ e.preventDefault(); playAll(); }
+});
+playAll();
+</script>
+</body>
+</html>

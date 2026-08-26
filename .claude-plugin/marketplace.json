@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "nbg-unity",
+  "description": "Unity toolkit for NBG projects: MCP tool skills, studio coding standard, reward-package workflows.",
+  "owner": {
+    "name": "BMH",
+    "url": "https://github.com/BingoBoiz/unity-skill-plugins"
+  },
+  "metadata": {
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "unity-mcp",
+      "source": "unity-mcp",
+      "description": "Feeder MCP tool skills for driving the Unity Editor: scene, gameobject, assets, prefab, script, screenshot, profiler, ui-inspect. Portable to any Unity project wired to the MCP bridge."
+    },
+    {
+      "name": "unity-standard",
+      "source": "unity-standard",
+      "description": "Portable Unity workflows: recompile/play-mode loop, Firebase analytics event shape, UI FX brainstorming, plan-first prompting."
+    },
+    {
+      "name": "reward-system",
+      "source": "reward-system",
+      "description": "Everything specific to the reward package hosts: package contract, C# and UI standards, UI-from-image, play-mode verification, Vietnamese docs, git release."
+    }
+  ],
+  "renames": {}
+}
