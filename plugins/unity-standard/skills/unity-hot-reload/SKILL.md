@@ -7,9 +7,9 @@ description: Decide how a C# change reaches the running Unity Editor in a Unity 
 
 ## The premise: check for Hot Reload before assuming
 
-Grep `Packages/manifest.json`, `Packages/packages-lock.json`, `Packages/`, `Assets/Plugins/` and `Assets/BBPackages/` for `com.singularitygroup.hotreload`. On the reward hosts it is **not installed**, so everything below applies. Some sibling projects do have it; do not carry that habit across without checking.
+Grep `Packages/manifest.json`, `Packages/packages-lock.json`, `Packages/`, `Assets/Plugins/` and any vendored-package folder for `com.singularitygroup.hotreload`, and branch on the answer. **Check per project, every time** — sibling projects differ, and carrying the habit across is how a session ends up running stale code for an hour.
 
-Consequences, all of them load-bearing:
+Everything below assumes it is **not** installed, which is the common case. Consequences, all of them load-bearing:
 
 - **Every** C# change requires a domain reload. There is no "patch it into the running game" path.
 - A script edit made while play mode is running does **not** take effect in that session.
@@ -58,7 +58,7 @@ Fix: ask the user to click the Unity window once. Then re-check `editor-applicat
 
 ## Compiling without opening Unity
 
-When the Editor is not running and you only need to know whether the code compiles, use the offline route: `csc` with the Bee-generated `.rsp` plus the package DLLs resolved from the `Library/` folder of a sibling Unity project that holds the same NabaGame package sources. This is the only compile signal available with Unity closed — it catches syntax and reference errors, not serialization or runtime wiring.
+When the Editor is not running and you only need to know whether the code compiles, use the offline route: `csc` with the Bee-generated `.rsp` from `Library/Bee/`, plus the referenced DLLs resolved from a `Library/ScriptAssemblies` folder that already has them — this project's, or a sibling project on the same package set. This is the only compile signal available with Unity closed; it catches syntax and reference errors, not serialization or runtime wiring.
 
 ## If Hot Reload is installed later
 

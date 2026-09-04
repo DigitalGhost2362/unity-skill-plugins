@@ -1,3 +1,13 @@
+> **STALE - REGENERATE BEFORE TRUSTING.** This file was written against the tree as it stood on
+> 2026-08-19, right after the strip-to-reward-core, and it now contradicts `reward-package` and
+> `reward-system:unity-coding` on the most load-bearing facts: it says the package is "docs only -
+> zero C#, no asmdef" and that host scripts live in `Assets/_GameBase/Scripts/` under namespace
+> `PainAndSeek`, while the package has since shipped `NabaGame.Reward` runtime code with the demo
+> host under `Samples~/RewardDemo/`. Regenerate it from the live tree - the template and the
+> sprite-catalogue dump snippet are in `unity-standard:unity-ui-from-image`'s
+> `reference/project-facts-template.md` - before using anything below. Only the sprite catalogue
+> (GUIDs read from `.meta`) and the font GUIDs are likely to have survived unchanged.
+
 # Project facts — reward-system UI
 
 Unity **2022.3.62f3**. **No URP** (built-in render pipeline; `universal` appears nowhere in `Packages/manifest.json`).
@@ -42,7 +52,7 @@ There is **no prefab hosting it and no scene containing it**. `EditorBuildSettin
 
 ## Sorting orders
 
-Only one panel exists, so there is no live band table. `RewardPanel.prefab` uses **200** on its root Canvas and **201** on each nested animated group — the reference project's convention. Adopt the reference bands when building more (HUD 50–60, popups 200–250, toast 210, transition 300, tutorial 500); they are documented in `unity-ui-panel/reference/ui-framework.md` §B4.
+Only one panel exists, so there is no live band table. `RewardPanel.prefab` uses **200** on its root Canvas and **201** on each nested animated group — the reference project's convention. Adopt the reference bands when building more (HUD 50–60, popups 200–250, toast 210, transition 300, tutorial 500); they are documented in `unity-standard:unity-ui-panel`, `reference/ui-reference-hierarchy.md` section B4.
 
 ## Component GUIDs
 
@@ -141,4 +151,4 @@ The strip removed every panel the old version of this file cited. What actually 
 
 ## Template prefabs
 
-`Assets/_GameBase/Prefabs/UI/Template/` **does not exist yet**. The two surviving templates (`RewardPanel/DailyItemTemplate`, `PlaytimeSlotTemplate`) are plain disabled children inside `RewardPanel.prefab`, predating the extract-to-prefab rule. When you touch them, extract them per `unity-ui-panel` Rule 6. Package templates ship inside the package feature folder, not here.
+`Assets/_GameBase/Prefabs/UI/Template/` **does not exist yet**. The two surviving templates (`RewardPanel/DailyItemTemplate`, `PlaytimeSlotTemplate`) are plain disabled children inside `RewardPanel.prefab`, predating the extract-to-prefab rule. When you touch them, extract them per `unity-standard:unity-ui-panel` Rule 4. Package templates ship inside the package feature folder, not here.

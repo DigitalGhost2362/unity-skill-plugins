@@ -1,0 +1,25 @@
+{
+  "name": "reward-system",
+  "version": "0.1.0",
+  "description": "Reward-package-specific Unity workflows layered on top of the shared Unity standard.",
+  "author": {
+    "name": "BMH"
+  },
+  "homepage": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "repository": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "license": "UNLICENSED",
+  "keywords": ["unity", "reward", "package", "verification", "release"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Reward System",
+    "shortDescription": "Reward package Unity workflows",
+    "longDescription": "Adds reward-host package, documentation, verification, UI, and release deltas on top of Unity Standard.",
+    "developerName": "BMH",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Implement this reward package task and verify it.",
+      "Prepare the reward package for release."
+    ]
+  }
+}

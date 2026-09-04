@@ -1,12 +1,12 @@
 // Audit a built panel prefab: every serialized object reference, canvas sorting,
-// UIPanel state, each button's persistent-call count (must be 0 in this project),
+// panel state, each button's persistent-call count (must be 0 - buttons are wired in code),
 // every Image's sprite/type vs its native ratio (wrong-sprite smells), and every
-// repeated widget/template child that should be a nested Prefabs/UI/Template/ prefab.
+// repeated widget/template child that should be a nested template prefab.
 // Run with script-execute, isMethodBody: false, className "PanelVerify", methodName "Main".
 // Set PrefabPath before running.
 //
 // Not every NULL is a bug — fields that are populated at runtime (e.g. a RenderTexture
-// the widget creates in StartClass) legitimately read NULL on the asset. Check each one
+// the widget creates in Initialize) legitimately read NULL on the asset. Check each one
 // against the panel's code rather than assuming the wiring failed.
 
 using System.Collections.Generic;
@@ -18,7 +18,30 @@ using NabaGame.UI;
 
 public class PanelVerify
 {
-    const string PrefabPath = "Assets/_GameBase/Prefabs/UI/Panel/MyPanel.prefab";
+    const string PrefabPath = "Assets/<ui-panel-folder>/MyPanel.prefab";
+
+    // Namespaces owned by this project. Components outside them are uGUI/framework
+    // parts and are skipped. Read these off the project facts file.
+    static readonly string[] ProjectNamespacePrefixes = { "" };
+
+    // The TMP material every label must carry, by asset name. Empty = do not check.
+    const string ExpectedFontMaterialName = "";
+
+    // An empty ProjectNamespacePrefixes list means "audit everything except the
+    // obvious engine namespaces" - fill it in to cut the noise on a big prefab.
+    static bool IsProjectType(string ns)
+    {
+        if (ns.StartsWith("UnityEngine") || ns.StartsWith("UnityEditor") || ns.StartsWith("TMPro"))
+            return false;
+        bool any = false;
+        foreach (string prefix in ProjectNamespacePrefixes)
+        {
+            if (prefix.Length == 0) continue;
+            any = true;
+            if (ns == prefix || ns.StartsWith(prefix + ".")) return true;
+        }
+        return !any;
+    }
 
     public static void Main()
     {
@@ -33,7 +56,7 @@ public class PanelVerify
         {
             if (mb == null) continue;
             string ns = mb.GetType().Namespace ?? "";
-            if (ns != "PainAndSeek" && !ns.StartsWith("NabaGame.Reward")) continue;   // skip uGUI/framework components
+            if (!IsProjectType(ns)) continue;   // skip uGUI/framework components
 
             sb.AppendLine("--- " + mb.GetType().Name + " on '" + mb.name +
                           "' (active=" + mb.gameObject.activeSelf + ") ---");
@@ -63,13 +86,13 @@ public class PanelVerify
         int badFontMats = 0;
         foreach (TMPro.TextMeshProUGUI t in go.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
         {
-            // Project convention: PassionOne-Bold Atlas Black, never the font's default material.
+            // Never the font asset's default material when the project ships a variant.
             string matPath = t.fontSharedMaterial ? AssetDatabase.GetAssetPath(t.fontSharedMaterial) : "";
-            bool ok = matPath.EndsWith("PassionOne-Bold Atlas Black.mat");
+            bool ok = ExpectedFontMaterialName.Length == 0 || matPath.EndsWith(ExpectedFontMaterialName);
             if (!ok) badFontMats++;
             sb.AppendLine("text '" + t.name + "' mat=" +
                           (t.fontSharedMaterial ? t.fontSharedMaterial.name : "NULL") +
-                          (ok ? "" : "  *** must be PassionOne-Bold Atlas Black ***"));
+                          (ok ? "" : "  *** must be " + ExpectedFontMaterialName + " ***"));
         }
 
         int badButtons = 0;
@@ -82,8 +105,8 @@ public class PanelVerify
 
         // The art ships at the exact ratio it has in the mockup, so a sprite that needed
         // Sliced or off-ratio stretching to fit is almost always the WRONG sprite (see
-        // project-facts.md § sprite rule #2). Only 6/468 project sprites have borders.
-        // User-corrected panels stay within ~20% of native ratio; 25% is the flag line.
+        // the facts file). Most 2D UI art has no 9-slice border at all.
+        // Hand-corrected panels stay within ~20% of native ratio; 25% is the flag line.
         int spriteSmells = 0;
         foreach (Image img in go.GetComponentsInChildren<Image>(true))
         {
@@ -120,13 +143,13 @@ public class PanelVerify
         Dictionary<System.Type, int> widgetCounts = new Dictionary<System.Type, int>();
         foreach (MonoBehaviour mb in go.GetComponentsInChildren<MonoBehaviour>(true))
         {
-            if (mb == null) continue; { var mns = mb.GetType().Namespace ?? ""; if (mns != "PainAndSeek" && !mns.StartsWith("NabaGame.Reward")) continue; }
+            if (mb == null) continue; if (!IsProjectType(mb.GetType().Namespace ?? "")) continue;
             int n; widgetCounts.TryGetValue(mb.GetType(), out n);
             widgetCounts[mb.GetType()] = n + 1;
         }
         foreach (MonoBehaviour mb in go.GetComponentsInChildren<MonoBehaviour>(true))
         {
-            if (mb == null) continue; { var mns = mb.GetType().Namespace ?? ""; if (mns != "PainAndSeek" && !mns.StartsWith("NabaGame.Reward")) continue; }
+            if (mb == null) continue; if (!IsProjectType(mb.GetType().Namespace ?? "")) continue;
             if (mb.transform == go.transform) continue;
             string lower = mb.name.ToLower();
             bool repeated = widgetCounts[mb.GetType()] > 1;

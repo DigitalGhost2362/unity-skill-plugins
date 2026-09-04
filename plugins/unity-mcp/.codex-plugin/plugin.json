@@ -1,0 +1,25 @@
+{
+  "name": "unity-mcp",
+  "version": "0.1.0",
+  "description": "Unity Editor MCP tool skills for scene, GameObject, asset, prefab, script, UI inspection, screenshot, test, and profiler work.",
+  "author": {
+    "name": "BMH"
+  },
+  "homepage": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "repository": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "license": "UNLICENSED",
+  "keywords": ["unity", "mcp", "editor", "prefab", "profiler"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Unity MCP",
+    "shortDescription": "Unity Editor MCP tool workflows",
+    "longDescription": "Provides focused instructions for driving a Unity Editor connected through the Feeder MCP bridge.",
+    "developerName": "BMH",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Inspect the open Unity scene and report issues.",
+      "Run the Unity tests and summarize failures."
+    ]
+  }
+}

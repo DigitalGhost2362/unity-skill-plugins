@@ -1,40 +1,51 @@
-// Template: build a reward-system UI panel prefab through Unity.
+// Template: build a Unity UI panel prefab through the Editor.
 // Run with script-execute, isMethodBody: false, className "PanelBuilder", methodName "Main".
 //
-// Adapt: PrefabPath, the panel component type, and everything inside BuildContent().
-// Keep: the root component order, the Copy/PasteComponentValues block, and Set().
+// Adapt: the FILL-IN block below, the panel component type, and everything inside
+// BuildContent(). Keep: the root component order, the Copy/PasteComponentValues
+// block, and Set().
 //
-// The only full panel prefab in this repo to study is:
-//   Assets/_GameBase/Prefabs/UI/Panel/RewardPanel.prefab (tabs + grid + disabled templates).
+// Every value in the FILL-IN block comes from this project's facts file
+// (.claude/unity-project-facts.md — see reference/project-facts-template.md).
+// Never invent a path or a GUID here.
 
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
-using PainAndSeek;   // host panels. For package panels use NabaGame.Reward instead.
-using NabaGame.UI;
+// using <YourPanelNamespace>;   // where your panel type lives
+using NabaGame.UI;               // the project's UI framework namespace; change if it uses another
 
 public class PanelBuilder
 {
-    const string PrefabPath = "Assets/_GameBase/Prefabs/UI/Panel/MyPanel.prefab";
+    // ---------- FILL-IN: read these off the project facts file ----------
 
-    // Any existing popup. Its Canvas / GraphicRaycaster / UIPanel (incl. in+out
-    // animations) get copied onto the new panel. Do NOT rebuild animations by hand:
-    // UIElement.Show() silently no-ops unless an In animation is enabled.
-    const string SourcePanel = "Assets/_GameBase/Prefabs/UI/Panel/RewardPanel.prefab";
+    const string PrefabPath = "Assets/<ui-panel-folder>/MyPanel.prefab";
+    const string TemplateDir = "Assets/<ui-template-folder>";
 
-    // Prefer the target screen's own art folder (Sprites/asset/<screen>/) over these
-    // generic sprites — see project-facts.md § sprites. Pick each sprite by NATIVE
-    // ASPECT RATIO (dump the folder first, § sprite rule #2), never by colour alone.
-    // Checkmarks: reward_0009_tich-V "78e997e6537efe7429c21f55dd900712".
-    const string GuidBoxFill = "36b7b88e4f57fda4093961d8e7327b9e"; // play_0006_white-box-1 (fallback fill only)
-    const string GuidClose = "ff8e0ca330523f141a312f288e9a9e99"; // play/close-button
-    const string GuidFont = "8bf226b02a873e942b04b101f2a31744";     // PassionOne-Bold SDF
-    const string GuidFontMat = "1892185b89f456d48b81da49a8047168";  // PassionOne-Bold Atlas Black.mat — mandatory
+    // Any existing WORKING popup in this project. Its Canvas / GraphicRaycaster /
+    // panel component (incl. in+out animations) get copied onto the new panel.
+    // Do NOT rebuild animations by hand: the framework's Show() silently no-ops
+    // unless an In animation channel is enabled.
+    const string SourcePanel = "Assets/<ui-panel-folder>/<AnExistingPanel>.prefab";
+
+    // Prefer the target screen's OWN art folder over any generic sprite, and pick each
+    // sprite by NATIVE ASPECT RATIO (dump the folder first), never by colour alone.
+    // GUIDs come from the facts file's sprite catalogue.
+    const string GuidBoxFill = "";  // fallback fill box, only when the screen has no BG layer
+    const string GuidClose = "";    // close button
+    const string GuidFont = "";     // the project's TMP font asset
+    const string GuidFontMat = "";  // the project's TMP font MATERIAL — assign it explicitly
+
+    // The resolution the mockup was drawn at; mockup pixels are canvas units 1:1.
+    const float RefWidth = 2400f;
+    const float RefHeight = 1080f;
 
     static readonly Color PanelDark = new Color(0.101f, 0.121f, 0.219f, 1f);
     static readonly Color DarkText = new Color(0.129f, 0.145f, 0.243f, 1f);
+
+    // ---------- end FILL-IN ----------
 
     // ---------- helpers ----------
 
@@ -74,8 +85,8 @@ public class PanelBuilder
     // Default Simple + preserveAspect. The art ships at the exact ratio it has in the
     // mockup: if a sprite seems to need Sliced / off-ratio stretching / tinting to fit,
     // it is the WRONG sprite (same-coloured siblings differ by ratio) — re-match by
-    // native ratio instead of adjusting. Only 6/468 project sprites have 9-slice
-    // borders at all; the warning below fires when Sliced would do nothing.
+    // native ratio instead of adjusting. Most 2D UI art has no 9-slice
+    // border at all; the warning below fires when Sliced would do nothing.
     static Image Img(GameObject go, string guid, bool sliced, bool raycast)
     {
         Image img = go.AddComponent<Image>();
@@ -100,28 +111,27 @@ public class PanelBuilder
         rt.sizeDelta = new Vector2(height * r.width / r.height, height);
     }
 
-    // Every repeated cell/slot/row is its own prefab in Prefabs/UI/Template/, named after
-    // its widget script (QuestSlot.prefab hosts QuestSlotItem) — the user has had to
-    // extract one by hand when a build skipped this. Call BEFORE SaveAsPrefabAsset on the
-    // panel root: Connect turns the in-panel GO into a nested instance of the new prefab.
+    // Every repeated cell/slot/row is its own prefab in TemplateDir, named after its widget
+    // script (QuestSlot.prefab hosts QuestSlotItem). Skipping this forces someone to extract
+    // it by hand afterwards. Call BEFORE SaveAsPrefabAsset on the panel root: Connect turns
+    // the in-panel GO into a nested instance of the new prefab.
     // Deactivate the returned INSTANCE for dynamic-list templates; the asset root stays active.
     static GameObject SaveTemplate(GameObject templateGo, string prefabName)
     {
-        string dir = "Assets/_GameBase/Prefabs/UI/Template";
-        Directory.CreateDirectory(dir);
-        PrefabUtility.SaveAsPrefabAssetAndConnect(templateGo, dir + "/" + prefabName + ".prefab",
+        Directory.CreateDirectory(TemplateDir);
+        PrefabUtility.SaveAsPrefabAssetAndConnect(templateGo, TemplateDir + "/" + prefabName + ".prefab",
             InteractionMode.AutomatedAction);
         return templateGo;
     }
 
     // Extra copies for a fixed board (a 7-day strip, spin wedges). Object.Instantiate here would
-    // create plain clones that stop following the Template prefab. After nesting, wire the
+    // create plain clones that stop following the template prefab. After nesting, wire the
     // instances IN ORDER into the panel's serialized List<> (SerializedObject.FindProperty)
-    // and author per-slot cosmetics (background sprites) on each instance — decision #28.
+    // and author per-slot cosmetics (background sprites) on each instance.
     static GameObject Nest(string prefabName, Transform parent)
     {
         GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(
-            "Assets/_GameBase/Prefabs/UI/Template/" + prefabName + ".prefab");
+            TemplateDir + "/" + prefabName + ".prefab");
         GameObject go = (GameObject)PrefabUtility.InstantiatePrefab(asset);
         go.transform.SetParent(parent, false);
         return go;
@@ -133,8 +143,8 @@ public class PanelBuilder
         string fp = AssetDatabase.GUIDToAssetPath(GuidFont);
         TMP_FontAsset f = string.IsNullOrEmpty(fp) ? null : AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fp);
         if (f) t.font = f;
-        // Setting .font alone assigns the WRONG default material ("Atlas Material").
-        // The project convention is Atlas Black (baked black outline) — must be explicit.
+        // Setting .font alone assigns the font asset's DEFAULT material, which is usually
+        // not the one the project uses (outlines are baked into a variant) — be explicit.
         string mp = AssetDatabase.GUIDToAssetPath(GuidFontMat);
         Material fm = string.IsNullOrEmpty(mp) ? null : AssetDatabase.LoadAssetAtPath<Material>(mp);
         if (fm) t.fontSharedMaterial = fm;
@@ -197,7 +207,7 @@ public class PanelBuilder
         Debug.Log(saved ? "prefab created: " + PrefabPath : "FAILED to save prefab");
     }
 
-    // Design resolution is 2400x1080 (see project-facts.md; re-confirm against the RefUI mockups).
+    // Design resolution is RefWidth x RefHeight (see the project facts file).
     static void BuildContent(GameObject root, UIPanel uiPanel, MonoBehaviour panel)
     {
         GameObject window = UI("Window", root.transform);

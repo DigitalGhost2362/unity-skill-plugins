@@ -1,0 +1,25 @@
+{
+  "name": "unity-standard",
+  "version": "0.1.0",
+  "description": "Portable Unity coding, UI, verification, documentation, and release standards for Codex.",
+  "author": {
+    "name": "BMH"
+  },
+  "homepage": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "repository": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "license": "UNLICENSED",
+  "keywords": ["unity", "csharp", "ui", "standards", "playmode"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Unity Standard",
+    "shortDescription": "Shared Unity engineering standards",
+    "longDescription": "Applies the NBG Unity coding standard and exposes focused skills for C#, UI, hot reload, play-mode verification, package documentation, and releases.",
+    "developerName": "BMH",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Implement this Unity task using the shared standard.",
+      "Review this Unity code against the shared standard."
+    ]
+  }
+}

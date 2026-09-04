@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "unity-standard",
-  "description": "Portable Unity workflows: recompile/play-mode loop, Firebase analytics event shape, UI FX brainstorming, plan-first prompting.",
+  "description": "The portable Unity standard, applied automatically in any Unity project: C# and UI conventions, mockup-to-prefab pipeline, recompile and play-mode verification, package docs and git discipline.",
   "author": {
     "name": "BMH"
   },
@@ -12,6 +12,10 @@
     "unity",
     "csharp",
     "ui",
-    "standard"
+    "ugui",
+    "standard",
+    "conventions",
+    "playmode",
+    "hooks"
   ]
 }

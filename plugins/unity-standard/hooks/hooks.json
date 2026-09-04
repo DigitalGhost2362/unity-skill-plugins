@@ -1,0 +1,17 @@
+{
+  "description": "Inject the nbg-unity standard into every session that starts inside a Unity project.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/unity-context.sh\"",
+            "commandWindows": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${PLUGIN_ROOT}\\hooks\\unity-context.ps1\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

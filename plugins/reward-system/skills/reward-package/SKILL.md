@@ -1,6 +1,6 @@
 ---
 name: reward-package
-description: Mandatory workflow for building the reusable UPM package Packages/com.nabagame.reward/ (namespace NabaGame.Reward) — the entire purpose of this repo. Covers the folder contract, asmdef boundaries, the panel-owned contract (decisions #21-#27: one prefab per feature, rows in via SetInfo, grants out via Row.OnClaimed, static RewardHooks), the leniency ladder, and the definition of done. Use for ANY work on package code, package docs, the sample, or integration questions.
+description: Mandatory workflow for building the reusable UPM package Packages/com.nabagame.reward/ (namespace NabaGame.Reward) — the entire purpose of this repo. Covers the folder contract, asmdef boundaries, the panel-owned contract (decisions #21-#27: one prefab per feature, rows in via Initialize, grants out via Row.OnClaimed, static RewardHooks), the leniency ladder, and the definition of done. Use for ANY work on package code, package docs, the sample, or integration questions.
 ---
 
 # Reward package workflow (`com.nabagame.reward`)
@@ -43,7 +43,7 @@ Feature folders never reference each other; `Core/` never references a feature. 
 
 ## Rule 3 — One panel, one row list, grants via `OnClaimed` (decisions #21–#24)
 
-There is **no package-side manager**. `{Feature}Panel` owns save, timers, ads, IAP, and rules. The host writes a ~15-line manager (templates: `Samples~/RewardDemo/Scripts/Sample{Feature}Manager.cs`) that fills `[TableList] public List<{Feature}Row> rows`, assigns each row's `OnClaimed`, and calls `panel.SetInfo(rows)` at boot.
+There is **no package-side manager**. `{Feature}Panel` owns save, timers, ads, IAP, and rules. The host writes a ~15-line manager (templates: `Samples~/RewardDemo/Scripts/Sample{Feature}Manager.cs`) that fills `[TableList] public List<{Feature}Row> rows`, assigns each row's `OnClaimed`, and calls `panel.Initialize(rows)` at boot.
 
 Everything the dev fills lives in the one row class — `Key` (opaque), `Icon`, `Amount`, `ClaimSfx`, `OnClaimed`, plus feature extras (`Weight`, `UnlockAfterSeconds`, `LabelOverride`). List position is the index — there is no `Day`/`Wedge`/`Slot` field. Rows ship constructors for code authoring and a parameterless ctor for the Inspector.
 
@@ -51,17 +51,17 @@ Grants: the panel mutates + saves, `Debug.Log`s the grant (mandatory audit line)
 
 Leniency ladder: incomplete row data → one aggregated `LogWarning` via `{Feature}Row.Warn(rows, context)`; structural breakage (empty list, <2 wedges, non-increasing unlocks) → throw naming index+value; unset hooks → LogError then proceed. A half-filled prefab must run and complain, never brick.
 
-## Rule 4 — Static hooks, `SetInfo` lifecycle (decisions #23, #25)
+## Rule 4 — Static hooks, `Initialize` lifecycle (decisions #23, #25)
 
-`RewardHooks` is a **static class with safe defaults** (`PlaySfx` no-ops; `ShowRewardedAd`/`PurchaseIap` LogError then reward/succeed), assigned once at boot before any `SetInfo`, reset via `[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]`.
+`RewardHooks` is a **static class with safe defaults** (`PlaySfx` no-ops; `ShowRewardedAd`/`PurchaseIap` LogError then reward/succeed), assigned once at boot before any `Initialize`, reset via `[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]`.
 
-Lifecycle naming: `SetInfo(List<{Feature}Row>)` is the **single** init (validate → load save → arm timers → bind the authored board list / build dynamic templates → bind listeners idempotently). `OpenPanel()`/`ClosePanel()` are the dev-facing activation APIs — **never rename them**, `BaseUIInspectorProcessor` string-matches those names. `StartClass` is retired; never reintroduce it. Call `SetInfo` from `Start()`, never `Awake()`; Online Reward must be initialized at boot (accrual starts there).
+Lifecycle naming: `Initialize(List<{Feature}Row>)` is the **single** init (validate → load save → arm timers → bind the authored board list / build dynamic templates → bind listeners idempotently). `OpenPanel()`/`ClosePanel()` are the dev-facing activation APIs — **never rename them**, `BaseUIInspectorProcessor` string-matches those names. `StartClass` and `SetInfo` are retired; never reintroduce them. Call `Initialize` from `Start()`, never `Awake()`; Online Reward must be initialized at boot (accrual starts there).
 
 Panel regions, fixed vocabulary in order: `#region API` (first — init, open/close, red-dot queries, reset, placement consts; a dev reads only this), `Logic`, `UI`, `Debug`.
 
 ## Rule 5 — Null-tolerant UI (decision #26)
 
-Every serialized UI reference may be disabled or deleted by the dev: guard every dereference, `LogError`-and-skip a missing template or empty authored board list, silently skip null authored-list entries, bounds-check cell/wedge indexing, keep click callbacks null-safe (`RewardUi.Bind` handles buttons). `AdFlow.Busy` auto-releases after ~15s when a host SDK swallows both callbacks — a flow may fail, it must never stick. `OpenPanel` before `SetInfo` logs one error and refuses.
+Every serialized UI reference may be disabled or deleted by the dev: guard every dereference, `LogError`-and-skip a missing template or empty authored board list, silently skip null authored-list entries, bounds-check cell/wedge indexing, keep click callbacks null-safe (`RewardUi.Bind` handles buttons). `AdFlow.Busy` auto-releases after ~15s when a host SDK swallows both callbacks — a flow may fail, it must never stick. `OpenPanel` before `Initialize` logs one error and refuses.
 
 ## Rule 6 — Time and persistence
 
@@ -84,12 +84,12 @@ One standalone `BaseUI` popup per feature, prefab-authored. Everything in `unity
 ## Rule 9 — Definition of done
 
 - [ ] Lives under `Runtime/Features/<Feature>/`, referencing only `Core/` and allowed externals.
-- [ ] `SetInfo(rows)` applies the leniency ladder: warns on gaps, throws only on structure, never on hooks.
+- [ ] `Initialize(rows)` applies the leniency ladder: warns on gaps, throws only on structure, never on hooks.
 - [ ] Zero references to game types, game enums, ES3, ads SDKs, or `TrackingManager`.
 - [ ] Grants leave only through `Row.OnClaimed` (with the mandatory audit log); the sample's `OnClaimed` grants end to end.
 - [ ] Persistence is PlayerPrefs + `JsonUtility` with a `Version` field; save-on-mutation only.
 - [ ] No `Update()`; clock reads via `RewardClock`, deadlines via `TimeScheduler`; countdown loops gate on `IsVisible()`.
-- [ ] UI is prefab-authored (fixed boards wired into serialized lists, decision #28), regions are `API`/`Logic`/`UI`/`Debug`, `SetInfo` cannot duplicate listeners, and the null-button pass holds (including deleting an authored card/wedge).
+- [ ] UI is prefab-authored (fixed boards wired into serialized lists, decision #28), regions are `API`/`Logic`/`UI`/`Debug`, `Initialize` cannot duplicate listeners, and the null-button pass holds (including deleting an authored card/wedge).
 - [ ] The package compiles standalone with the console clean, and the sample scene drives the feature end to end.
 
 Then bump the version per SemVer and add a CHANGELOG entry.

@@ -1,0 +1,44 @@
+{
+  "name": "nbg-unity",
+  "interface": {
+    "displayName": "NBG Unity"
+  },
+  "plugins": [
+    {
+      "name": "unity-standard",
+      "source": {
+        "source": "local",
+        "path": "./plugins/unity-standard"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "DeveloperTools"
+    },
+    {
+      "name": "unity-mcp",
+      "source": {
+        "source": "local",
+        "path": "./plugins/unity-mcp"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "DeveloperTools"
+    },
+    {
+      "name": "reward-system",
+      "source": {
+        "source": "local",
+        "path": "./plugins/reward-system"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "DeveloperTools"
+    }
+  ]
+}

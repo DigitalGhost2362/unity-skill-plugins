@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "reward-system",
-  "description": "Everything specific to the reward package hosts: package contract, C# and UI standards, UI-from-image, play-mode verification, Vietnamese docs, git release.",
+  "description": "Reward-package deltas on top of unity-standard: the package contract, the package/demo-host boundary, repo UI facts, play-mode levers, Vietnamese docs, git release.",
   "author": {
     "name": "BMH"
   },

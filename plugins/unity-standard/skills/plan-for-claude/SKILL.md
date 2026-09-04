@@ -21,13 +21,17 @@ Before any other research: read `AGENTS.md` (especially its `## Local skills` se
 |---|---|
 | C# scripts | `unity-coding` + `unity-hot-reload` |
 | Panel / popup / widget / button | `unity-ui-panel` |
-| Building UI from a mockup image | `ui-from-image` |
+| Building UI from a mockup image | `unity-ui-from-image` |
 | Choosing an animation or effect | `ui-fx-brainstorm` |
-| Package structure or contract | `reward-package` |
-| Tracked README / CHANGELOG / package.json | `reward-docs` |
-| Proving behavior in Play mode | `reward-verify` |
-| Git, commit, tag, version bump | `release` |
+| Tracked README / CHANGELOG / package.json | `unity-package-docs` |
+| Proving behavior in Play mode | `unity-playmode-verify` |
+| Git, commit, tag, version bump | `unity-git-release` |
 | Analytics events | `firebase-event-tracking` |
+
+Those are the portable `unity-standard` skills. A project-specific plugin (e.g. `reward-system`)
+ships **deltas** on top of several of them - `reward-package` for the package contract,
+`reward-system:unity-coding` and `reward-system:unity-ui-panel` for that repo's boundaries. When one
+exists, read the generic skill first and the delta second; the delta wins on conflict.
 
 Repo skills **override** your defaults. Never plan a Unity task without this step.
 
@@ -43,7 +47,7 @@ Every path, class/method name, API and version must trace to a file you read or 
 
 A plan violating any of these is wrong. Rewrite it.
 
-- `.meta` files and GUIDs are **Unity's output**. Never copy, overwrite, hand-edit or generate them. See the `reward-system:release` skill: "never hand-write GUIDs".
+- `.meta` files and GUIDs are **Unity's output**. Never copy, overwrite, hand-edit or generate them. See `unity-git-release`: "never hand-write GUIDs".
 - Never bulk-copy (`robocopy`, `cp -r`, `xcopy`, `Copy-Item -Recurse`) over a folder Unity imports. Move or rename assets through the Editor (`assets-move`, `assets-copy`) so the AssetDatabase keeps references intact.
 - Any step that could change a GUID must first list every asset referencing it and get the user's explicit approval. Broken references fail silently.
 - Serialized assets (`.prefab`, `.unity`, `.asset`, `.meta`) are edited by Unity, not by text tools, unless the user explicitly asked for a text edit.
