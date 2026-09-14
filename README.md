@@ -27,9 +27,10 @@ namespace; only user skills (`<config home>/skills/<name>`) keep a bare name.
 So `unity-standard` keeps its skills in `user-skills/`, not `skills/`. Claude Code does not load that
 folder as plugin skills. Instead the `SessionStart` hook copies each one into
 `${CLAUDE_CONFIG_DIR:-~/.claude}/skills/<name>` and drops a `.nbg-unity` marker holding the plugin
-root it came from. On later sessions it re-copies only when the plugin root changed (after an
-update), deletes marked copies whose skill no longer exists, and never touches a folder without the
-marker. It prints a warning to stderr if a name is already taken.
+root it came from. On later sessions it re-copies a skill only when the plugin root changed or a
+source file is newer than the marker. The mtime check matters for a directory-source marketplace,
+whose root stays the same across updates. It deletes marked copies whose skill no longer exists, and
+never touches a folder without the marker; if a name is already taken it prints a warning to stderr.
 
 Consequences:
 
@@ -113,8 +114,7 @@ No plugin declares a `version`, so the marketplace commit is the version: one
 `git push` here, one `marketplace update` there, and every machine is on the same
 rules. Nothing to bump by hand.
 
-The short-name copies of `unity-standard` refresh at the next session start after the update, because
-the plugin root they were copied from has changed.
+The short-name copies of `unity-standard` refresh at the next session start after the update.
 
 To keep auto-update off, `~/.claude/settings.json` carries:
 
@@ -144,9 +144,8 @@ claude --plugin-dir ./unity-skill-plugins/plugins/unity-standard
 
 `--plugin-dir` overrides the installed copy for that session, so you can try a
 change before publishing it. `/reload-plugins` picks up further edits without a
-restart. The exception is `unity-standard`'s short-name copies: their plugin root stays the same, so
-the hook never re-copies them. Delete `<config home>/skills/<name>/.nbg-unity` and start a new
-session to pick up an edit. Validate before pushing:
+restart. `unity-standard`'s short-name copies are the exception: they refresh at the next session
+start. Validate before pushing:
 
 ```bash
 claude plugin validate ./plugins/unity-standard

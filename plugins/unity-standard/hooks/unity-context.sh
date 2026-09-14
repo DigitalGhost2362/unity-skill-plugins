@@ -9,26 +9,31 @@
 # User skills keep their bare name. The skills live in user-skills/ (not skills/)
 # so Claude does not also load a namespaced copy. A copy carries a .nbg-unity
 # marker holding the plugin root it came from; a folder without it is never touched.
+# A directory-source marketplace keeps the same root across updates, so a source
+# file newer than the marker also triggers a re-copy.
 src="$CLAUDE_PLUGIN_ROOT/user-skills"
 dest="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills"
 command -v cygpath >/dev/null 2>&1 && dest=$(cygpath -u "$dest")
 
 if [ -d "$src" ] && mkdir -p "$dest"; then
   for skill in "$src"/*/; do
-    name=$(basename "$skill")
-    target="$dest/$name"
-    if [ -e "$target" ] && [ ! -f "$target/.nbg-unity" ]; then
+    skill=${skill%/}
+    target="$dest/${skill##*/}"
+    marker="$target/.nbg-unity"
+    if [ -e "$target" ] && [ ! -f "$marker" ]; then
       echo "nbg-unity: $target exists and is not managed by this plugin; left untouched" >&2
       continue
     fi
-    [ "$(cat "$target/.nbg-unity" 2>/dev/null)" = "$CLAUDE_PLUGIN_ROOT" ] && continue
+    root=
+    [ -f "$marker" ] && IFS= read -r root < "$marker"
+    [ "$root" = "$CLAUDE_PLUGIN_ROOT" ] && [ -z "$(find "$skill" -newer "$marker")" ] && continue
     rm -rf "$target"
-    cp -R "$skill" "$target" && printf '%s' "$CLAUDE_PLUGIN_ROOT" > "$target/.nbg-unity"
+    cp -R "$skill" "$target" && printf '%s\n' "$CLAUDE_PLUGIN_ROOT" > "$marker"
   done
   for marker in "$dest"/*/.nbg-unity; do
     [ -f "$marker" ] || continue
-    owned=$(dirname "$marker")
-    [ -d "$src/$(basename "$owned")" ] || rm -rf "$owned"
+    owned=${marker%/.nbg-unity}
+    [ -d "$src/${owned##*/}" ] || rm -rf "$owned"
   done
 fi
 
