@@ -1,11 +1,11 @@
 ---
 name: reward-docs
-description: Reward-repo delta on the studio package-docs standard. Read unity-standard:unity-package-docs first - it owns the tracked-vs-internal split, the reader test, the doc-sync matrix pattern, the voice rules and the ASCII rule. This file holds the reward specifics - the real file paths in the sync matrix, the Vietnamese consumer voice and fixed section headings, the banned project-name list, and the repo-scoped self-scan. Trigger on any request to write, translate, restructure, review or sync package documentation, changelog entries, or a feature spec.
+description: Reward-repo delta on the studio package-docs standard. Read unity-package-docs first - it owns the tracked-vs-internal split, the reader test, the doc-sync matrix pattern, the voice rules and the ASCII rule. This file holds the reward specifics - the real file paths in the sync matrix, the Vietnamese consumer voice and fixed section headings, the banned project-name list, and the repo-scoped self-scan. Trigger on any request to write, translate, restructure, review or sync package documentation, changelog entries, or a feature spec.
 ---
 
 # Package docs - reward delta
 
-**Read `unity-standard:unity-package-docs` first.** It is the standard: tracked vs internal, the
+**Read `unity-package-docs` first.** It is the standard: tracked vs internal, the
 reader test (Rule 0b - apply it to every sentence), the doc-sync matrix as a pattern, voice, the
 fixed feature-spec section order, the banned vocabulary and ASCII punctuation, and the self-scan.
 `reward-release` owns the commit-time rules; this skill owns the writing.

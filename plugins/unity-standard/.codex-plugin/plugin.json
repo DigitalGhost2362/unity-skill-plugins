@@ -9,7 +9,7 @@
   "repository": "https://github.com/BingoBoiz/unity-skill-plugins",
   "license": "UNLICENSED",
   "keywords": ["unity", "csharp", "ui", "standards", "playmode"],
-  "skills": "./skills/",
+  "skills": "./user-skills/",
   "interface": {
     "displayName": "Unity Standard",
     "shortDescription": "Shared Unity engineering standards",

@@ -1,17 +1,17 @@
 ---
 name: unity-ui-panel
-description: Reward-repo delta on the studio UI standard. Read unity-standard:unity-ui-panel first; this file adds only what is specific to the reward hosts - the package/demo-host namespace split, SampleUIManager registration and the boot chain, the concrete panel parking coordinates on the 2400x1080 canvas, BaseUIInspectorProcessor and the OnValidate shadowing trap, and the protected Vietnamese field comments. Use it every time you create, edit, or wire any UI panel, popup, widget, button, or HUD element in this repo.
+description: Reward-repo delta on the studio UI standard. Read unity-ui-panel first; this file adds only what is specific to the reward hosts - the package/demo-host namespace split, SampleUIManager registration and the boot chain, the concrete panel parking coordinates on the 2400x1080 canvas, BaseUIInspectorProcessor and the OnValidate shadowing trap, and the protected Vietnamese field comments. Use it every time you create, edit, or wire any UI panel, popup, widget, button, or HUD element in this repo.
 ---
 
 # Unity UI panel workflow - reward delta
 
-**Read `unity-standard:unity-ui-panel` first.** It is the standard: the panel contract
+**Read `unity-ui-panel` first.** It is the standard: the panel contract
 (`Initialize` / `OpenPanel` / `ClosePanel`), zero comments, code-only button wiring, one prefab per
 repeated element, anchors and pivots, panel parking, layering, events, tweens, the mandatory debug
 buttons, and the finishing checklist. `reward-system:unity-coding` applies underneath both.
 
 All UI in this repo sits on `com.nabagame.ui`, a renamed fork of DoozyUI v2 - read
-`unity-standard:unity-ui-panel`'s `reference/nabagame-ui.md` before touching a panel prefab. Three
+`unity-ui-panel`'s `reference/nabagame-ui.md` before touching a panel prefab. Three
 of its four traps silently break panels that otherwise look correct.
 
 ## Rule 1 - Namespace and location depend on which side you are on

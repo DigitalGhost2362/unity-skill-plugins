@@ -1,11 +1,11 @@
 ---
 name: reward-verify
-description: Reward-repo delta on the studio play-mode runbook. Read unity-standard:unity-playmode-verify first - it owns the preconditions, the focus trap, the evidence rules and the three standing passes. This file holds the reward specifics - the demo scene and save keys, the per-feature lever table, the public and private Preview* inventory, the SRDebugger hack menu, the ad/IAP outcome fields, and the exact log lines to expect. Use whenever a task must be proven in play mode, when running a FEATURES checklist, when reproducing a claim/spin/timer/save bug, and before reporting any package task done.
+description: Reward-repo delta on the studio play-mode runbook. Read unity-playmode-verify first - it owns the preconditions, the focus trap, the evidence rules and the three standing passes. This file holds the reward specifics - the demo scene and save keys, the per-feature lever table, the public and private Preview* inventory, the SRDebugger hack menu, the ad/IAP outcome fields, and the exact log lines to expect. Use whenever a task must be proven in play mode, when running a FEATURES checklist, when reproducing a claim/spin/timer/save bug, and before reporting any package task done.
 ---
 
 # Play-mode verification - reward delta
 
-**Read `unity-standard:unity-playmode-verify` first.** It is the runbook: preconditions and the
+**Read `unity-playmode-verify` first.** It is the runbook: preconditions and the
 Editor focus trap, reaching a clean state, public levers over reflection, why time and SDKs cannot be
 faked, what evidence to collect, the three standing passes, and reporting honestly.
 

@@ -1,11 +1,11 @@
 ---
 name: reward-release
-description: Reward-repo delta on the studio git workflow. Read unity-standard:unity-git-release first - it owns the refusal posture, the allowlist pattern, the meta-pairing check, SemVer, the CHANGELOG shape, commit style and the publish-on-tag flow. This file holds the reward specifics - the exact tracked set, the leak-scan token list, the owner identity, fresh-clone junction setup, and the GitLab CI job. Use when asked to commit, stage, release, bump the version, update the changelog, tag, or push.
+description: Reward-repo delta on the studio git workflow. Read unity-git-release first - it owns the refusal posture, the allowlist pattern, the meta-pairing check, SemVer, the CHANGELOG shape, commit style and the publish-on-tag flow. This file holds the reward specifics - the exact tracked set, the leak-scan token list, the owner identity, fresh-clone junction setup, and the GitLab CI job. Use when asked to commit, stage, release, bump the version, update the changelog, tag, or push.
 ---
 
 # Release and commit - reward delta
 
-**Read `unity-standard:unity-git-release` first.** It is the workflow: what git shapes are refused,
+**Read `unity-git-release` first.** It is the workflow: what git shapes are refused,
 the staging allowlist pattern, `.meta` pairing, tilde folders, the leak scan, SemVer, the CHANGELOG
 entry, commit style, no attribution, tags, refusing to push, and publish-on-tag.
 

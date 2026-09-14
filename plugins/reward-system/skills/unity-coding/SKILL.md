@@ -1,11 +1,11 @@
 ---
 name: unity-coding
-description: Reward-repo delta on the studio C# standard. Read unity-standard:unity-coding first; this file adds only what is specific to the reward hosts - the boundary between the embedded package Packages/com.nabagame.reward/ and the Samples~/RewardDemo demo host (symlinked at Assets/_RewardDemo), the concrete owner of every shared capability (RewardClock, TimeScheduler, RewardProfileStore, AdFlow, RewardHooks, RewardUi.Bind), the reward leniency ladder, and the authoritative package docs. Trigger on any request to write, add, refactor, fix, or review C# in this repo.
+description: Reward-repo delta on the studio C# standard. Read unity-coding first; this file adds only what is specific to the reward hosts - the boundary between the embedded package Packages/com.nabagame.reward/ and the Samples~/RewardDemo demo host (symlinked at Assets/_RewardDemo), the concrete owner of every shared capability (RewardClock, TimeScheduler, RewardProfileStore, AdFlow, RewardHooks, RewardUi.Bind), the reward leniency ladder, and the authoritative package docs. Trigger on any request to write, add, refactor, fix, or review C# in this repo.
 ---
 
 # Unity coding standard - reward delta
 
-**Read `unity-standard:unity-coding` first.** It is the standard: minimalism, reuse-first, the
+**Read `unity-coding` first.** It is the standard: minimalism, reuse-first, the
 `API`/`Logic`/`UI`/`Debug` regions, the leniency ladder, the comment policy, and `Initialize()` as
 the single init convention. This file adds only what is specific to this repo, and overrides the
 generic skill on conflict.

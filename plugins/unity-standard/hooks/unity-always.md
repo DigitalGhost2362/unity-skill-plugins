@@ -1,7 +1,7 @@
 # Unity project detected — the nbg-unity standard is in effect
 
 These rules apply to every piece of work in this project, whether or not a skill was invoked.
-They are the compressed form; the full text lives in the `unity-standard:*` skills listed below.
+They are the compressed form; the full text lives in the skills listed below.
 
 ## Non-negotiables
 
@@ -45,13 +45,13 @@ They are the compressed form; the full text lives in the `unity-standard:*` skil
 
 | Before | Invoke |
 |---|---|
-| any C# | `unity-standard:unity-coding` |
-| any UI panel, popup, widget, button | `unity-standard:unity-ui-panel` |
-| building UI from a mockup image | `unity-standard:unity-ui-from-image` |
-| any recompile / play-mode round trip | `unity-standard:unity-hot-reload` |
-| proving a task is done | `unity-standard:unity-playmode-verify` |
-| package docs, README, CHANGELOG | `unity-standard:unity-package-docs` |
-| commit, version bump, tag | `unity-standard:unity-git-release` |
+| any C# | `unity-coding` |
+| any UI panel, popup, widget, button | `unity-ui-panel` |
+| building UI from a mockup image | `unity-ui-from-image` |
+| any recompile / play-mode round trip | `unity-hot-reload` |
+| proving a task is done | `unity-playmode-verify` |
+| package docs, README, CHANGELOG | `unity-package-docs` |
+| commit, version bump, tag | `unity-git-release` |
 
 A project-local `CLAUDE.md`, `AGENTS.md`, or a plugin that declares itself a delta on these skills
 overrides this text on conflict.

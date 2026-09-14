@@ -33,7 +33,7 @@ Try the native MCP tools first (`editor-application-get-state`). If they are not
 session, use the bundled bridge:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/unity-ui-from-image/scripts/mcp.py" <tool-name> <args.json>
+python3 "${CLAUDE_SKILL_DIR}/scripts/mcp.py" <tool-name> <args.json>
 ```
 
 The bridge reads the endpoint from the project's `.mcp.json` - never hard-code a port; each Unity
@@ -41,7 +41,7 @@ host listens on its own. Confirm with `scene-list-opened` before trusting any ca
 execution:
 
 ```python
-import os, sys; sys.path.insert(0, os.path.join(os.environ['CLAUDE_PLUGIN_ROOT'], 'skills/unity-ui-from-image/scripts'))
+import sys; sys.path.insert(0, r"${CLAUDE_SKILL_DIR}/scripts")
 import mcp
 print(mcp.run_csharp('Debug.Log("hi");', 'Probe'))          # body-only
 print(mcp.call('script-execute', {...}))                    # full class

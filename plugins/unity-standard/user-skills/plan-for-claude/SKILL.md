@@ -22,7 +22,7 @@ Before any other research: read `AGENTS.md` (especially its `## Local skills` se
 | C# scripts | `unity-coding` + `unity-hot-reload` |
 | Panel / popup / widget / button | `unity-ui-panel` |
 | Building UI from a mockup image | `unity-ui-from-image` |
-| Choosing an animation or effect | `ui-fx-brainstorm` |
+| Choosing an animation or effect | `brainstorm` |
 | Tracked README / CHANGELOG / package.json | `unity-package-docs` |
 | Proving behavior in Play mode | `unity-playmode-verify` |
 | Git, commit, tag, version bump | `unity-git-release` |

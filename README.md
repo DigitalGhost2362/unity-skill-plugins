@@ -12,10 +12,33 @@ picks it up from here.
 | `unity-standard` | 10 | **The standard.** C# and UI conventions, mockup-to-prefab pipeline, recompile loop, play-mode verification, package docs, git release, Firebase event shape, UI FX brainstorming, plan-first prompting. Applied automatically in any Unity project (see below). |
 | `reward-system` | 7 | Reward hosts only: the package contract plus **deltas** on the `unity-standard` skills - the package/demo-host boundary, repo UI facts, play-mode levers, Vietnamese docs, git release. |
 
-Skills are namespaced once installed: `unity-coding` becomes
-`/unity-standard:unity-coding`. Where both plugins ship a skill of the same name, the
-`reward-system` one is a delta: read the `unity-standard` version first, and the delta wins on
-conflict.
+Plugin skills are namespaced once installed: `ui-from-image` becomes
+`/reward-system:ui-from-image`. **`unity-standard` is the exception** - its skills keep their bare
+name (`/unity-coding`, `/brainstorm`), see *Short skill names* below. Where both plugins ship a skill
+of the same name, the `reward-system` one is a delta: read the `unity-standard` version first, and
+the delta wins on conflict.
+
+## Short skill names
+
+Poracode's slash menu matches only the *start* of a skill's full name, so a namespaced
+`unity-standard:brainstorm` never shows up for `/brai`. Claude Code has no setting to drop a plugin
+namespace; only user skills (`<config home>/skills/<name>`) keep a bare name.
+
+So `unity-standard` keeps its skills in `user-skills/`, not `skills/`. Claude Code does not load that
+folder as plugin skills. Instead the `SessionStart` hook copies each one into
+`${CLAUDE_CONFIG_DIR:-~/.claude}/skills/<name>` and drops a `.nbg-unity` marker holding the plugin
+root it came from. On later sessions it re-copies only when the plugin root changed (after an
+update), deletes marked copies whose skill no longer exists, and never touches a folder without the
+marker. It prints a warning to stderr if a name is already taken.
+
+Consequences:
+
+- A fresh install shows the short names from the **second** session on. The first session is the
+  one that copies them.
+- A skill that ships scripts addresses them as `${CLAUDE_SKILL_DIR}`, never `${CLAUDE_PLUGIN_ROOT}`.
+  The copy runs as a user skill, and `CLAUDE_PLUGIN_ROOT` is not set there.
+- Each config home gets its own copy. A machine running several `CLAUDE_CONFIG_DIR`s installs the
+  plugin once per home, as it already has to.
 
 ## Always applied
 
@@ -90,6 +113,9 @@ No plugin declares a `version`, so the marketplace commit is the version: one
 `git push` here, one `marketplace update` there, and every machine is on the same
 rules. Nothing to bump by hand.
 
+The short-name copies of `unity-standard` refresh at the next session start after the update, because
+the plugin root they were copied from has changed.
+
 To keep auto-update off, `~/.claude/settings.json` carries:
 
 ```json
@@ -118,7 +144,9 @@ claude --plugin-dir ./unity-skill-plugins/plugins/unity-standard
 
 `--plugin-dir` overrides the installed copy for that session, so you can try a
 change before publishing it. `/reload-plugins` picks up further edits without a
-restart. Validate before pushing:
+restart. The exception is `unity-standard`'s short-name copies: their plugin root stays the same, so
+the hook never re-copies them. Delete `<config home>/skills/<name>/.nbg-unity` and start a new
+session to pick up an edit. Validate before pushing:
 
 ```bash
 claude plugin validate ./plugins/unity-standard
@@ -133,10 +161,12 @@ plugins/<plugin>/
     .codex-plugin/plugin.json        <- Codex manifest
     .claude-plugin/plugin.json       <- only plugin.json lives here
     skills/<skill>/SKILL.md          <- skills/, hooks/, agents/ sit at plugin root
+plugins/unity-standard/
+    user-skills/<skill>/SKILL.md     <- copied to user skills by the hook (short names)
 ```
 
-Scripts bundled with a skill must be addressed through `${CLAUDE_PLUGIN_ROOT}`;
-a plugin cannot reference files outside its own directory.
+Scripts bundled with a skill must be addressed through `${CLAUDE_SKILL_DIR}`, which works for plugin
+and user skills alike. A plugin cannot reference files outside its own directory.
 
 Each entry in `marketplace.json` must spell its `source` out as an explicit
 relative path:
