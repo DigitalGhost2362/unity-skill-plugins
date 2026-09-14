@@ -10,6 +10,8 @@ not verified. Recompiling is `unity-hot-reload`'s job - do that first, then come
 
 ## Rule 0 - Preconditions, in order
 
+0. **You hold the Editor lock** (`unity-shared-editor`). Other sessions may share this Editor; if the
+   lock is taken or a human is playing, write the test cases instead and stop.
 1. **Unity Editor open on this project and holding OS focus.** An unfocused Editor never finishes
    compiling: `isCompiling` stays true forever and no MCP call unsticks it. If a compile does not
    return, ask the user to click the Editor window. Plan for it - if the user is away, report the

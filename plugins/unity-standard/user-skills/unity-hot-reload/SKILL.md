@@ -27,6 +27,10 @@ Everything below assumes it is **not** installed, which is the common case. Cons
 
 ## Tool order
 
+Every step below that compiles or enters play mode needs the Editor lock (`unity-shared-editor`). If
+Hot Reload *is* installed, a plain file save already reaches whoever is playing - another session's
+test included.
+
 Preferred, because it validates before it writes:
 
 1. `script-update-or-create` — Roslyn-validates the C#, rejects invalid code without touching the file, writes it, refreshes the AssetDatabase, and delivers the post-compilation result via `requestId`.

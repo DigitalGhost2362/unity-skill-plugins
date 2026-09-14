@@ -40,6 +40,9 @@ They are the compressed form; the full text lives in the skills listed below.
   project has Hot Reload installed. Play mode must be stopped for a script change to take effect.
 - **Verify in play mode, or say plainly that you did not.** A code reading is never a verification
   result.
+- **The Editor may be shared with other sessions.** Claim `Temp/agent-editor-lock` before entering
+  play mode, compiling, opening a scene or wiping prefs. If it is taken, write the test cases to
+  `TestCases/` and stop - never test over someone else's play session.
 
 ## Full skills — invoke before the matching work
 
@@ -48,6 +51,7 @@ They are the compressed form; the full text lives in the skills listed below.
 | any C# | `unity-coding` |
 | any UI panel, popup, widget, button | `unity-ui-panel` |
 | building UI from a mockup image | `unity-ui-from-image` |
+| play mode, compile, scene open, prefs wipe; handing off or running test cases | `unity-shared-editor` |
 | any recompile / play-mode round trip | `unity-hot-reload` |
 | proving a task is done | `unity-playmode-verify` |
 | package docs, README, CHANGELOG | `unity-package-docs` |
