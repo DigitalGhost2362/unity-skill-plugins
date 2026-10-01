@@ -2,12 +2,12 @@ import json, os, pathlib, sys, urllib.request
 
 
 def _url():
-    """Read the Feeder MCP endpoint from the project's .mcp.json.
+    """Read the Unity MCP endpoint from the project's .mcp.json.
 
     The port differs per Unity host, so it must never be hard-coded here:
     this script is shared by every project through the nbg-unity marketplace.
     """
-    env = os.environ.get("FEEDER_MCP_URL")
+    env = os.environ.get("UNITY_MCP_URL")
     if env:
         return env
     root = pathlib.Path(os.environ.get("CLAUDE_PROJECT_DIR", ".")).resolve()
@@ -16,14 +16,14 @@ def _url():
         if f.is_file():
             servers = json.loads(f.read_text(encoding="utf-8")).get("mcpServers", {})
             for name, cfg in servers.items():
-                if "url" in cfg and "feeder" in name.lower():
+                if "url" in cfg and any(h in name.lower() for h in ("unity", "matrix", "feeder")):
                     return cfg["url"]
             for cfg in servers.values():
                 if "url" in cfg:
                     return cfg["url"]
     raise SystemExit(
         "No .mcp.json with an http MCP server found from "
-        f"{root}. Run from the Unity project root, or set FEEDER_MCP_URL."
+        f"{root}. Run from the Unity project root, or set UNITY_MCP_URL."
     )
 
 

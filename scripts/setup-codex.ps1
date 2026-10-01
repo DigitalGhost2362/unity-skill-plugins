@@ -28,7 +28,7 @@ if ($marketplaceEntry) {
     }
 }
 
-$plugins = @('unity-standard', 'unity-mcp')
+$plugins = @('unity-standard')
 if ($WithRewardSystem) {
     $plugins += 'reward-system'
 }

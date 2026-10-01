@@ -30,7 +30,9 @@ These exist because a build of this kind burned ~270k tokens on avoidable work.
 ## Step 0 - Connect to Unity, and load the facts
 
 Try the native MCP tools first (`editor-application-get-state`). If they are not registered in this
-session, use the bundled bridge:
+session, use the bundled bridge. With no Editor bridge at all, stop and say so: this pipeline only
+produces evidence through the Editor, so write the C# and the layout spec and report the prefab as
+not built:
 
 ```bash
 python3 "${CLAUDE_SKILL_DIR}/scripts/mcp.py" <tool-name> <args.json>
@@ -47,9 +49,8 @@ print(mcp.run_csharp('Debug.Log("hi");', 'Probe'))          # body-only
 print(mcp.call('script-execute', {...}))                    # full class
 ```
 
-If a tool you need reports `FMP_TOOL_NOT_FOUND`, it is disabled in the Unity plugin. Re-enable it
-with `scripts/enable_tools.cs` (run it via `script-execute`, then re-list tools) - it flips the
-state and calls `Save(true)`, which is what actually republishes the tool list.
+If a tool you need is missing or reports it is disabled, enable it with `tool-set-enabled-state`
+(list candidates with `unity-tool-list`), then re-list tools.
 
 **Then read the project's facts file**, normally `.claude/unity-project-facts.md`. It holds the
 paths, design resolution, sorting bands, component/font GUIDs and the sprite catalogue that this
@@ -253,7 +254,3 @@ was deliberately not wired.
 - `scripts/mcp.py` - HTTP/SSE bridge client; resolves the endpoint from the project's `.mcp.json`.
 - `scripts/prefab-builder-template.cs` - adapt per panel; fill in the FILL-IN block first.
 - `scripts/verify-wiring.cs` - serialized-ref / sorting / button / sprite audit.
-- `scripts/enable_tools.cs` - republish disabled MCP tools.
-
-> This folder is safe from `unity-skill-generate`, which only overwrites skills named after MCP
-> tools. Do not rename it to a tool name.

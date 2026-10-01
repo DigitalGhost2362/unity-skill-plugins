@@ -10,13 +10,12 @@ not verified. Recompiling is `unity-hot-reload`'s job - do that first, then come
 
 ## Rule 0 - Preconditions, in order
 
-0. **You hold the Editor lock** (`unity-shared-editor`). Other sessions may share this Editor; if the
-   lock is taken or a human is playing, write the test cases instead and stop.
 1. **Unity Editor open on this project and holding OS focus.** An unfocused Editor never finishes
    compiling: `isCompiling` stays true forever and no MCP call unsticks it. If a compile does not
    return, ask the user to click the Editor window. Plan for it - if the user is away, report the
    change as written but not compiled rather than waiting on a request that cannot finish.
-2. MCP reachable (`ping`).
+2. MCP reachable (`ping`). No bridge means no play-mode evidence: report the task as not verified. If a shared-Editor skill is
+   installed, invoke it before play mode, a compile or a scene open.
 3. Code compiled with a clean console (`console-get-logs`). `editor-application-set-state` **throws
    while compile errors exist**, so this step is not optional.
 4. The right scene open (`scene-open`) before entering play mode.

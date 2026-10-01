@@ -35,14 +35,12 @@ They are the compressed form; the full text lives in the skills listed below.
   cannot run throws; an unknown key `LogError`s naming the key and is never silently mapped to
   something reasonable. Serialized UI references are optional — guard every dereference.
 - **Never hand-author `.prefab` or `.unity` YAML, and never read one whole.** Build and inspect
-  through the Editor (`script-execute`); grep for the few fields you need.
+  through the Editor API (`script-execute` when a bridge is connected, see Editor tools below); grep
+  for the few fields you need.
 - **Every `.cs` edit needs a real recompile and a console read** before it is live, unless this
   project has Hot Reload installed. Play mode must be stopped for a script change to take effect.
 - **Verify in play mode, or say plainly that you did not.** A code reading is never a verification
   result.
-- **The Editor may be shared with other sessions.** Claim `Temp/agent-editor-lock` before entering
-  play mode, compiling, opening a scene or wiping prefs. If it is taken, write the test cases to
-  `TestCases/` and stop - never test over someone else's play session.
 
 ## Full skills — invoke before the matching work
 
@@ -51,11 +49,20 @@ They are the compressed form; the full text lives in the skills listed below.
 | any C# | `unity-coding` |
 | any UI panel, popup, widget, button | `unity-ui-panel` |
 | building UI from a mockup image | `unity-ui-from-image` |
-| play mode, compile, scene open, prefs wipe; handing off or running test cases | `unity-shared-editor` |
 | any recompile / play-mode round trip | `unity-hot-reload` |
 | proving a task is done | `unity-playmode-verify` |
 | package docs, README, CHANGELOG | `unity-package-docs` |
 | commit, version bump, tag | `unity-git-release` |
+
+## Editor tools (optional)
+
+The workflow skills name tools of an Editor MCP bridge: `script-execute`, `script-update-or-create`,
+`assets-refresh`, `editor-application-set-state`, `console-get-logs`, `scene-open`,
+`screenshot-game-view`. A tool missing from your tool list may only be disabled: bridges keep tools
+off to save tokens, so call `unity-tool-list`, then `tool-set-enabled-state`, when the bridge offers
+them. With no bridge connected, write files with the file tools, use the offline route in
+`unity-hot-reload`, and say plainly that nothing was compiled or played. If a shared-Editor skill is
+installed, invoke it before play mode, a compile or a scene open.
 
 A project-local `CLAUDE.md`, `AGENTS.md`, or a plugin that declares itself a delta on these skills
 overrides this text on conflict.

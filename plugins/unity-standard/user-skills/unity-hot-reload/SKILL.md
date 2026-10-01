@@ -5,6 +5,11 @@ description: Decide how a C# change reaches the running Unity Editor in a Unity 
 
 # Recompile workflow
 
+No Editor bridge connected? Every `script-update-or-create`, `assets-refresh` and
+`editor-application-*` step below is unavailable: write the file, use the offline route at the end,
+and report the change as written but not compiled. A tool that is merely missing from your tool list
+may be disabled; see *Editor tools* in the always-on standard.
+
 ## The premise: check for Hot Reload before assuming
 
 Grep `Packages/manifest.json`, `Packages/packages-lock.json`, `Packages/`, `Assets/Plugins/` and any vendored-package folder for `com.singularitygroup.hotreload`, and branch on the answer. **Check per project, every time** — sibling projects differ, and carrying the habit across is how a session ends up running stale code for an hour.
@@ -26,10 +31,6 @@ Everything below assumes it is **not** installed, which is the common case. Cons
 | `[Button]` debug method already compiled | No recompile — just click it via the Odin inspector in play mode |
 
 ## Tool order
-
-Every step below that compiles or enters play mode needs the Editor lock (`unity-shared-editor`). If
-Hot Reload *is* installed, a plain file save already reaches whoever is playing - another session's
-test included.
 
 Preferred, because it validates before it writes:
 

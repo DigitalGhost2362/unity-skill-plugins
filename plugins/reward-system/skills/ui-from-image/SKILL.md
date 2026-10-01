@@ -6,7 +6,7 @@ description: Reward-repo delta for building a UI panel prefab from a mockup imag
 # UI from image - reward delta
 
 **Run `unity-ui-from-image`.** It owns the whole pipeline and ships the bundled
-scripts (`mcp.py`, `prefab-builder-template.cs`, `verify-wiring.cs`, `enable_tools.cs`) - invoke that
+scripts (`mcp.py`, `prefab-builder-template.cs`, `verify-wiring.cs`) - invoke that
 skill so the scripts resolve under its own `${CLAUDE_SKILL_DIR}`, and do not copy them here.
 
 `reward-system:unity-ui-panel` is the code-convention authority on top of it.
@@ -26,6 +26,3 @@ skill so the scripts resolve under its own `${CLAUDE_SKILL_DIR}`, and do not cop
   placeholder. Package UI may not touch any game enum (see `reward-package`), and the host has no
   config `.asset` files yet, so placeholders are the usual answer. Default to **prefab only, do not
   touch scenes**.
-
-> This folder is safe from `unity-skill-generate`, which only overwrites skills named after MCP
-> tools. Do not rename it to a tool name.

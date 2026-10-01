@@ -1,21 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "nbg-unity",
-  "description": "Unity toolkit for NBG projects: MCP tool skills, studio coding standard, reward-package workflows.",
+  "description": "Unity toolkit for NBG projects: studio coding standard and reward-package workflows. The Unity Editor tools themselves come from the Matrix package.",
   "owner": {
     "name": "BMH",
     "url": "https://github.com/BingoBoiz/unity-skill-plugins"
   },
   "plugins": [
     {
-      "name": "unity-mcp",
-      "source": "./plugins/unity-mcp",
-      "description": "Feeder MCP tool skills for driving the Unity Editor: scene, gameobject, assets, prefab, script, screenshot, profiler, ui-inspect. Portable to any Unity project wired to the MCP bridge."
-    },
-    {
       "name": "unity-standard",
       "source": "./plugins/unity-standard",
-      "description": "The portable Unity standard, applied automatically in any Unity project: C# and UI conventions, mockup-to-prefab pipeline, recompile and play-mode verification, package docs and git discipline."
+      "description": "The portable Unity standard, applied automatically in any Unity project: C# and UI conventions, mockup-to-prefab pipeline, recompile and play-mode verification, package docs and git discipline. Works with or without an Editor MCP bridge."
     },
     {
       "name": "reward-system",
@@ -23,5 +18,7 @@
       "description": "Reward-package deltas on top of unity-standard: the package contract, the package/demo-host boundary, repo UI facts, play-mode levers, Vietnamese docs, git release."
     }
   ],
-  "renames": {}
+  "renames": {
+    "unity-mcp": null
+  }
 }

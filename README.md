@@ -4,11 +4,16 @@ Marketplace `nbg-unity`. One repo holding every shared Claude Code and Codex ski
 NBG Unity projects, so a rule is written once and every project on every configured machine
 picks it up from here.
 
+This repo is the **policy** half: how to write and verify Unity work. The **tools** half, the
+Editor MCP bridge and the skills describing its tools, ships with the Matrix package and is generated
+by it. Each half works alone. Together the workflow skills drive the Editor through the bridge's
+tools. Without a bridge they still apply the conventions and say plainly what could not be
+compiled or played.
+
 ## Plugins
 
 | Plugin | Skills | Scope |
 |---|---|---|
-| `unity-mcp` | 83 | Feeder MCP tool skills: scene, gameobject, assets, prefab, script, screenshot, profiler, ui-inspect. Any Unity project wired to the MCP bridge. |
 | `unity-standard` | 10 | **The standard.** C# and UI conventions, mockup-to-prefab pipeline, recompile loop, play-mode verification, package docs, git release, Firebase event shape, UI FX brainstorming, plan-first prompting. Applied automatically in any Unity project (see below). |
 | `reward-system` | 7 | Reward hosts only: the package contract plus **deltas** on the `unity-standard` skills - the package/demo-host boundary, repo UI facts, play-mode levers, Vietnamese docs, git release. |
 
@@ -17,6 +22,10 @@ Plugin skills are namespaced once installed: `ui-from-image` becomes
 name (`/unity-coding`, `/brainstorm`), see *Short skill names* below. Where both plugins ship a skill
 of the same name, the `reward-system` one is a delta: read the `unity-standard` version first, and
 the delta wins on conflict.
+
+Tool skills such as `script-execute` are not here: the Matrix package generates them into the
+project, only for the tools that are enabled. Shared-Editor rules (the lock and test-case handoff
+for several agents on one Editor) live in Matrix too, because they only work with its tools.
 
 ## Short skill names
 
@@ -50,8 +59,9 @@ after a context compaction - it checks the project directory for
 which skill to invoke before which kind of work.
 
 The consequence: install the plugin once and every Unity project on that machine gets the rules,
-including a project created tomorrow. Outside a Unity project the hook prints nothing and costs
-nothing.
+including a project created tomorrow. Outside a Unity project the hook prints no rules. It does
+still install the short-name skills (see above), so their descriptions are listed in every
+session.
 
 Edit `plugins/unity-standard/hooks/unity-always.md` to change what gets injected. Keep it short - it
 is paid for on every session. The detection lives in `hooks/unity-context.sh` and the wiring in
@@ -64,8 +74,7 @@ claude plugin marketplace add https://github.com/BingoBoiz/unity-skill-plugins.g
 ```
 
 Then, in an interactive session, `/plugin install` and pick the plugins you want.
-A Unity project that is not a reward host only needs `unity-mcp` and
-`unity-standard`.
+A Unity project that is not a reward host only needs `unity-standard`.
 
 Auto-update is off by design (see below), so nothing changes under you.
 
@@ -90,7 +99,6 @@ The equivalent manual setup is:
 ```text
 codex plugin marketplace add <absolute-path-to-this-repo>
 codex plugin add unity-standard@nbg-unity
-codex plugin add unity-mcp@nbg-unity
 ```
 
 Codex requires one safety review for plugin hooks. Open Codex, run `/hooks`, review and trust the
@@ -99,8 +107,8 @@ point on, every Unity project on that machine - including projects created later
 standard automatically. A machine that only cloned the repo but did not register and install the
 plugins does not receive the rules.
 
-`unity-mcp` supplies tool instructions; the Unity project still needs the Feeder MCP bridge and the
-machine still needs its `ai-game-developer` MCP connection configured before those tools can run.
+The Editor tools come from the Matrix package, not from this repo. Install it in the Unity project
+and turn it on with Tools > Feeder > Matrix Setup; the workflow skills then use its tools.
 
 ## Update - Claude Code
 
