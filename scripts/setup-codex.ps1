@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [switch]$WithRewardSystem
+    [string[]]$Plugins = @('unity-core', 'unity-ui')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -15,26 +15,21 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Could not list Codex plugin marketplaces.'
 }
 
-$marketplaceEntry = $marketplaceOutput | Select-String -Pattern '^nbg-unity\s+' | Select-Object -First 1
+$marketplaceEntry = $marketplaceOutput | Select-String -Pattern '^dh-skills\s+' | Select-Object -First 1
 if ($marketplaceEntry) {
-    $registeredRoot = ($marketplaceEntry.Line -replace '^nbg-unity\s+', '').Trim()
+    $registeredRoot = ($marketplaceEntry.Line -replace '^dh-skills\s+', '').Trim()
     if ([System.IO.Path]::GetFullPath($registeredRoot) -ne [System.IO.Path]::GetFullPath($repoRoot)) {
-        throw "The nbg-unity marketplace already points to '$registeredRoot'. Remove it first with 'codex plugin marketplace remove nbg-unity'."
+        throw "The dh-skills marketplace already points to '$registeredRoot'. Remove it first with 'codex plugin marketplace remove dh-skills'."
     }
 } else {
     & codex plugin marketplace add $repoRoot
     if ($LASTEXITCODE -ne 0) {
-        throw 'Could not register the nbg-unity marketplace.'
+        throw 'Could not register the dh-skills marketplace.'
     }
 }
 
-$plugins = @('unity-standard')
-if ($WithRewardSystem) {
-    $plugins += 'reward-system'
-}
-
-foreach ($plugin in $plugins) {
-    & codex plugin add "$plugin@nbg-unity"
+foreach ($plugin in $Plugins) {
+    & codex plugin add "$plugin@dh-skills"
     if ($LASTEXITCODE -ne 0) {
         throw "Could not install $plugin."
     }
@@ -42,4 +37,4 @@ foreach ($plugin in $plugins) {
 
 Write-Host ''
 Write-Host 'Codex plugins installed.'
-Write-Host 'Open Codex, run /hooks, review and trust the unity-standard SessionStart hook, then start a new task from a Unity project root.'
+Write-Host 'Open Codex, run /hooks, review and trust the unity-core SessionStart hook, then start a new task from a Unity project root.'

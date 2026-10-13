@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "unity-ui",
+  "description": "uGUI workflow for Unity: panel lifecycle and layout rules, building a panel prefab from a mockup image, and brainstorming UI effects as an HTML preview.",
+  "homepage": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "repository": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "license": "UNLICENSED",
+  "keywords": [
+    "unity",
+    "ugui",
+    "ui",
+    "prefab",
+    "animation"
+  ]
+}

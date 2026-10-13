@@ -1,14 +1,14 @@
 {
-  "name": "nbg-unity",
+  "name": "dh-skills",
   "interface": {
-    "displayName": "NBG Unity"
+    "displayName": "DH Skills"
   },
   "plugins": [
     {
-      "name": "unity-standard",
+      "name": "unity-core",
       "source": {
         "source": "local",
-        "path": "./plugins/unity-standard"
+        "path": "./plugins/unity-core"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -17,10 +17,10 @@
       "category": "DeveloperTools"
     },
     {
-      "name": "reward-system",
+      "name": "unity-ui",
       "source": {
         "source": "local",
-        "path": "./plugins/reward-system"
+        "path": "./plugins/unity-ui"
       },
       "policy": {
         "installation": "AVAILABLE",

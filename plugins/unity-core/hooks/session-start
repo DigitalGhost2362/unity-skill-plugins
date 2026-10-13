@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# SessionStart: inside a Unity project, add the skill index (unity-always.md) to the
+# agent's context. Prints nothing elsewhere. Builtins only, because PATH can be empty here.
+
+set -euo pipefail
+
+case "$0" in
+  */*|*\\*) SCRIPT_DIR="$(cd "${0%[/\\]*}" && pwd)" ;;
+  *) SCRIPT_DIR="$(pwd)" ;;
+esac
+
+# ProjectVersion.txt exists from the moment the Editor creates a project; Assets/ and
+# .csproj files also show up in non-Unity trees.
+project="${CLAUDE_PROJECT_DIR:-$PWD}"
+[ -f "$project/ProjectSettings/ProjectVersion.txt" ] || exit 0
+
+index="$SCRIPT_DIR/unity-always.md"
+[ -r "$index" ] || exit 0
+text="$(<"$index")"
+
+text="${text//\\/\\\\}"
+text="${text//\"/\\\"}"
+text="${text//$'\r'/}"
+text="${text//$'\n'/\\n}"
+text="${text//$'\t'/\\t}"
+
+# Claude Code and Codex both read hookSpecificOutput.additionalContext. Piping through cat
+# absorbs the EPIPE Git Bash reports when the harness closes stdout early.
+out='{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n'
+if command -v cat >/dev/null 2>&1; then
+  printf "$out" "$text" | cat
+else
+  printf "$out" "$text"
+fi

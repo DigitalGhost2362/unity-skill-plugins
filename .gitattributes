@@ -1,1 +1,3 @@
 *.sh text eol=lf
+session-start text eol=lf
+*.cmd text eol=lf

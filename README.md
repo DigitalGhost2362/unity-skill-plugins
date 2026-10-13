@@ -1,84 +1,73 @@
 # unity-skill-plugins
 
-Marketplace `nbg-unity`. One repo holding every shared Claude Code and Codex skill for the
-NBG Unity projects, so a rule is written once and every project on every configured machine
-picks it up from here.
+Marketplace `dh-skills`. Shared Claude Code and Codex skills for Unity projects, written once and
+picked up by every project on every machine that installs them. The skills hold the policy - how to
+write, verify, document and release Unity work. They drive the Editor through an Editor MCP bridge
+when one is connected; without one they still apply the conventions and say plainly what could not
+be compiled or played.
 
-This repo is the **policy** half: how to write and verify Unity work. The **tools** half, the
-Editor MCP bridge and the skills describing its tools, ships with the Matrix package and is generated
-by it. Each half works alone. Together the workflow skills drive the Editor through the bridge's
-tools. Without a bridge they still apply the conventions and say plainly what could not be
-compiled or played.
+## Plugins and skills
 
-## Plugins
+Every skill is invoked by its bare name (`/coding`). If another plugin uses the same name, the full
+form `/unity-core:coding` always works.
 
-| Plugin | Skills | Scope |
+### `unity-core` - every role on a Unity project
+
+| Skill | Path | Use before |
 |---|---|---|
-| `unity-standard` | 10 | **The standard.** C# and UI conventions, mockup-to-prefab pipeline, recompile loop, play-mode verification, package docs, git release, Firebase event shape, UI FX brainstorming, plan-first prompting. Applied automatically in any Unity project (see below). |
-| `reward-system` | 7 | Reward hosts only: the package contract plus **deltas** on the `unity-standard` skills - the package/demo-host boundary, repo UI facts, play-mode levers, Vietnamese docs, git release. |
+| `/coding` | `plugins/unity-core/skills/coding/SKILL.md` | writing, fixing or reviewing any C# |
+| `/recompile` | `plugins/unity-core/skills/recompile/SKILL.md` | any recompile or play-mode round trip |
+| `/verify` | `plugins/unity-core/skills/verify/SKILL.md` | reporting a task done, reproducing a bug in play mode |
+| `/docs` | `plugins/unity-core/skills/docs/SKILL.md` | tracked README, CHANGELOG, package.json, feature specs |
+| `/release` | `plugins/unity-core/skills/release/SKILL.md` | commit, version bump, tag, release |
+| `/tracking` | `plugins/unity-core/skills/tracking/SKILL.md` | adding or changing an analytics event |
+| `/handoff` | `plugins/unity-core/skills/handoff/SKILL.md` | writing a plan and prompt for another agent to execute |
+| `/sheet-data` | `plugins/unity-core/skills/sheet-data/SKILL.md` | editing or formatting a Google data sheet with `n_`/`s_`/`f_` headers |
 
-Plugin skills are namespaced once installed: `ui-from-image` becomes
-`/reward-system:ui-from-image`. **`unity-standard` is the exception** - its skills keep their bare
-name (`/unity-coding`, `/brainstorm`), see *Short skill names* below. Where both plugins ship a skill
-of the same name, the `reward-system` one is a delta: read the `unity-standard` version first, and
-the delta wins on conflict.
+### `unity-ui` - uGUI work
 
-Tool skills such as `script-execute` are not here: the Matrix package generates them into the
-project, only for the tools that are enabled. Shared-Editor rules (the lock and test-case handoff
-for several agents on one Editor) live in Matrix too, because they only work with its tools.
+| Skill | Path | Use before |
+|---|---|---|
+| `/ui-panel` | `plugins/unity-ui/skills/ui-panel/SKILL.md` | any panel, popup, widget, button or HUD element |
+| `/ui-from-image` | `plugins/unity-ui/skills/ui-from-image/SKILL.md` | building a panel prefab from a mockup image |
+| `/brainstorm` | `plugins/unity-ui/skills/brainstorm/SKILL.md` | choosing how a UI effect or animation looks |
 
-## Short skill names
+A project that does no UI work only needs `unity-core`. A project can ship its own skills on top of
+these; the project skill wins on conflict.
 
-Poracode's slash menu matches only the *start* of a skill's full name, so a namespaced
-`unity-standard:brainstorm` never shows up for `/brai`. Claude Code has no setting to drop a plugin
-namespace; only user skills (`<config home>/skills/<name>`) keep a bare name.
+## Skill index hook
 
-So `unity-standard` keeps its skills in `user-skills/`, not `skills/`. Claude Code does not load that
-folder as plugin skills. Instead the `SessionStart` hook copies each one into
-`${CLAUDE_CONFIG_DIR:-~/.claude}/skills/<name>` and drops a `.nbg-unity` marker holding the plugin
-root it came from. On later sessions it re-copies a skill only when the plugin root changed or a
-source file is newer than the marker. The mtime check matters for a directory-source marketplace,
-whose root stays the same across updates. It deletes marked copies whose skill no longer exists, and
-never touches a folder without the marker; if a name is already taken it prints a warning to stderr.
+`unity-core` ships one `SessionStart` hook. On startup, after `/clear` and after a context
+compaction - not on resume - it checks the project for `ProjectSettings/ProjectVersion.txt`. In a
+Unity project it adds `plugins/unity-core/hooks/unity-always.md` to the agent context. Elsewhere it
+prints nothing.
 
-Consequences:
+That file is an index, not a rulebook: four universal rules, then which skill to invoke before which
+kind of work and which docs each skill carries. The rules themselves live in the skills, which load
+only when used. Keep the index short - it is paid for on every session, and anything over 10,000
+characters is cut to a preview.
 
-- A fresh install shows the short names from the **second** session on. The first session is the
-  one that copies them.
-- A skill that ships scripts addresses them as `${CLAUDE_SKILL_DIR}`, never `${CLAUDE_PLUGIN_ROOT}`.
-  The copy runs as a user skill, and `CLAUDE_PLUGIN_ROOT` is not set there.
-- Each config home gets its own copy. A machine running several `CLAUDE_CONFIG_DIR`s installs the
-  plugin once per home, as it already has to.
+Wiring:
 
-## Always applied
+- `hooks/hooks.json` calls `hooks/run-hook.cmd session-start`.
+- `run-hook.cmd` is a polyglot: cmd.exe runs its batch half, which finds Git Bash; a Unix shell runs
+  its bash half. One script therefore serves Claude Code and Codex on Windows, macOS and Linux.
+- `hooks/session-start` does the detection and prints the index as
+  `hookSpecificOutput.additionalContext`.
 
-`unity-standard` ships a `SessionStart` hook. On every session start - and again after `/clear` and
-after a context compaction - it checks the project directory for
-`ProjectSettings/ProjectVersion.txt` and, if it is a Unity project, prints
-`hooks/unity-always.md` into the agent context. That text is the compressed standard plus an index of
-which skill to invoke before which kind of work.
+On Windows the hook needs Git for Windows. Without bash it exits quietly and only the index is lost.
 
-The consequence: install the plugin once and every Unity project on that machine gets the rules,
-including a project created tomorrow. Outside a Unity project the hook prints no rules. It does
-still install the short-name skills (see above), so their descriptions are listed in every
-session.
-
-Edit `plugins/unity-standard/hooks/unity-always.md` to change what gets injected. Keep it short - it
-is paid for on every session. The detection lives in `hooks/unity-context.sh` and the wiring in
-`hooks/hooks.json`.
-
-## Install on a new machine - Claude Code
+## Install - Claude Code
 
 ```bash
 claude plugin marketplace add https://github.com/BingoBoiz/unity-skill-plugins.git
+claude plugin install unity-core@dh-skills
+claude plugin install unity-ui@dh-skills
 ```
-
-Then, in an interactive session, `/plugin install` and pick the plugins you want.
-A Unity project that is not a reward host only needs `unity-standard`.
 
 Auto-update is off by design (see below), so nothing changes under you.
 
-## Install on a new machine - Codex
+## Install - Codex
 
 Clone this repository, then run the setup script from PowerShell:
 
@@ -88,41 +77,28 @@ cd unity-skill-plugins
 powershell -ExecutionPolicy Bypass -File .\scripts\setup-codex.ps1
 ```
 
-Add `-WithRewardSystem` only on a machine that works on reward hosts:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup-codex.ps1 -WithRewardSystem
-```
-
-The equivalent manual setup is:
+It installs both plugins; pass `-Plugins unity-core` for the core plugin only. The manual
+equivalent:
 
 ```text
 codex plugin marketplace add <absolute-path-to-this-repo>
-codex plugin add unity-standard@nbg-unity
+codex plugin add unity-core@dh-skills
+codex plugin add unity-ui@dh-skills
 ```
 
-Codex requires one safety review for plugin hooks. Open Codex, run `/hooks`, review and trust the
-`unity-standard` `SessionStart` hook, then start a new task from the Unity project root. From that
-point on, every Unity project on that machine - including projects created later - receives the
-standard automatically. A machine that only cloned the repo but did not register and install the
-plugins does not receive the rules.
-
-The Editor tools come from the Matrix package, not from this repo. Install it in the Unity project
-and turn it on with Tools > Feeder > Matrix Setup; the workflow skills then use its tools.
+Codex requires one safety review for plugin hooks: open Codex, run `/hooks`, review and trust the
+`unity-core` `SessionStart` hook, then start a new task from the Unity project root.
 
 ## Update - Claude Code
 
-Updates are pulled on demand only. When you want the latest rules:
+Updates are pulled on demand only:
 
 ```
-/plugin marketplace update nbg-unity
+/plugin marketplace update dh-skills
 ```
 
-No plugin declares a `version`, so the marketplace commit is the version: one
-`git push` here, one `marketplace update` there, and every machine is on the same
-rules. Nothing to bump by hand.
-
-The short-name copies of `unity-standard` refresh at the next session start after the update.
+No plugin declares a `version`, so the marketplace commit is the version: one `git push` here, one
+`marketplace update` there, and every machine is on the same rules.
 
 To keep auto-update off, `~/.claude/settings.json` carries:
 
@@ -132,63 +108,59 @@ To keep auto-update off, `~/.claude/settings.json` carries:
 
 ## Update - Codex
 
-Pull the repository and rerun the setup script to reinstall the local plugin snapshots:
-
 ```powershell
 git pull
 powershell -ExecutionPolicy Bypass -File .\scripts\setup-codex.ps1
 ```
 
-Use `-WithRewardSystem` again if that optional plugin is installed. When a hook definition changes,
-Codex invalidates its previous trust hash; run `/hooks` and trust the new definition after reviewing
-the diff. Start a new task after reinstalling so the refreshed skills are discovered.
+When a hook definition changes, Codex invalidates its trust hash; run `/hooks` and trust the new
+definition after reviewing the diff. Start a new task so the refreshed skills are discovered.
 
 ## Editing a skill
 
 ```bash
 git clone https://github.com/BingoBoiz/unity-skill-plugins.git
-claude --plugin-dir ./unity-skill-plugins/plugins/unity-standard
+claude --plugin-dir ./unity-skill-plugins/plugins/unity-core
 ```
 
-`--plugin-dir` overrides the installed copy for that session, so you can try a
-change before publishing it. `/reload-plugins` picks up further edits without a
-restart. `unity-standard`'s short-name copies are the exception: they refresh at the next session
-start. Validate before pushing:
+`--plugin-dir` overrides the installed copy for that session, so you can try a change before
+publishing it. `/reload-plugins` picks up further edits without a restart. Validate before pushing:
 
 ```bash
-claude plugin validate ./plugins/unity-standard
+claude plugin validate .
+claude plugin validate ./plugins/unity-core
+claude plugin validate ./plugins/unity-ui
 ```
+
+Scripts bundled with a skill are addressed through `${CLAUDE_SKILL_DIR}`. A plugin cannot reference
+files outside its own directory.
 
 ## Layout
 
 ```
-.agents/plugins/marketplace.json      <- Codex marketplace catalog
-.claude-plugin/marketplace.json      <- the catalog; only this file lives here
+.claude-plugin/marketplace.json      <- Claude Code catalog; only this file lives here
+.agents/plugins/marketplace.json     <- Codex catalog
 plugins/<plugin>/
+    .claude-plugin/plugin.json       <- Claude Code manifest
     .codex-plugin/plugin.json        <- Codex manifest
-    .claude-plugin/plugin.json       <- only plugin.json lives here
-    skills/<skill>/SKILL.md          <- skills/, hooks/, agents/ sit at plugin root
-plugins/unity-standard/
-    user-skills/<skill>/SKILL.md     <- copied to user skills by the hook (short names)
+    skills/<skill>/SKILL.md          <- skills/ and hooks/ sit at the plugin root
+plugins/unity-core/hooks/
+    hooks.json  run-hook.cmd  session-start  unity-always.md
+scripts/setup-codex.ps1
 ```
 
-Scripts bundled with a skill must be addressed through `${CLAUDE_SKILL_DIR}`, which works for plugin
-and user skills alike. A plugin cannot reference files outside its own directory.
-
-Each entry in `marketplace.json` must spell its `source` out as an explicit
-relative path:
+Each entry in `marketplace.json` spells its `source` out as an explicit relative path:
 
 ```json
-{ "name": "unity-standard", "source": "./plugins/unity-standard" }
+{ "name": "unity-core", "source": "./plugins/unity-core" }
 ```
 
-Do not use a bare plugin name plus `metadata.pluginRoot`. That shorthand parses
-fine but Claude Code 2.1.x fails the install with *"This plugin uses a source
-type your Claude Code version does not support"*. The explicit `./plugins/<name>`
-form works on every version.
+Do not use a bare plugin name plus `metadata.pluginRoot`. That shorthand parses fine but Claude Code
+2.1.x fails the install with *"This plugin uses a source type your Claude Code version does not
+support"*.
 
 ## Renaming or removing a plugin
 
-Add an entry to `renames` in `marketplace.json` mapping the old name to the new
-one, or to `null` if removed. Treat that map as append-only history: add a new
-entry rather than editing an old one, or machines still on the old name break.
+Add an entry to `renames` in `.claude-plugin/marketplace.json` mapping the old name to the new one,
+or to `null` if removed. Treat that map as append-only history, or machines still on the old name
+break.
