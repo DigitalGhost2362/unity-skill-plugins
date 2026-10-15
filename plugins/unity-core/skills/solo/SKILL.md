@@ -37,13 +37,14 @@ SceneView.RepaintAll();
 ```
 
 - Build in **edit mode**. Changes made in play mode vanish on exit, and play mode puts the Game view
-  in front of the user.
+  in front of the user. Exception: lighting and atmosphere that runtime code overrides - Rule 7.
 - If the work lives in a prefab, open it in prefab mode (`AssetDatabase.OpenAsset(prefab)`) so the
   Scene view shows the prefab stage, instead of editing the asset invisibly from code.
 
 ## Rule 3 - Every change is seen
 
-Each step, inside the same `script-execute` that makes the change:
+Each step, inside the same `script-execute` that makes the change (steps 1, 2 and 4 are
+`scripts/solo-focus.cs`: `Run(target, "close" | "wide" | "keep")`, with a bounds sanity check):
 
 1. **Point at it.** `Selection.activeGameObject = go;` and `EditorGUIUtility.PingObject(go);` -
    the Hierarchy highlights it and the Inspector shows the component you are about to touch.
@@ -85,6 +86,10 @@ Things that do not show on their own - handle them, or say so:
 - **Read before writing.** Start each step by reading the current state of what you are about to
   touch (transform, material values, selection). The user may have changed it by hand since your last
   call; build on their version.
+- **Raycast before you assign.** Before changing the material of "the cliff" or "the ground" you see
+  in a capture, raycast from that camera through those viewport points and read the renderer that is
+  hit, its path and its materials. The object named like the thing is often not the one drawn there
+  (a separate art mesh, a collider-only proxy, a sibling under another root).
 - Keep going. Do not stop between steps to ask permission. Ask only when you are truly blocked or a
   choice is the user's to make (a style, a direction you cannot infer). Then ask one short question and
   wait.
@@ -115,3 +120,66 @@ The user's message always beats your plan.
 - Capture the view with `screenshot-scene-view` if the bridge has it; otherwise render
   `SceneView.lastActiveSceneView.camera` into a `RenderTexture`, write it as PNG under `Temp/`, and
   read the file. Behavior changes still go through `verify`.
+- Any capture snippet you write yourself restores `cam.targetTexture` and `RenderTexture.active`,
+  then `Object.DestroyImmediate` **both** the RenderTexture and the Texture2D in a `finally`.
+  `rt.Release()` alone leaks the object; a few dozen leaked full-size captures in one Editor session
+  are enough to push a 4 GB GPU into a driver crash. Prefer `scripts/ref-shot-capture.cs`.
+
+## Rule 7 - Lighting and atmosphere: tune in play mode, judge the game camera
+
+Matching a look (a reference image, a mood brief) is judged on what the game camera renders, not on
+the Scene view: the Scene view has no runtime overrides (scripts writing `RenderSettings`, sun,
+fog), different post-processing, and a Volume stack that may never update. The Scene view is only for
+the user to follow along.
+
+1. **Find the runtime owners first.** Grep for code that writes `RenderSettings`, lights, fog, sky or
+   Volume weights at runtime, and check the URP asset's Volume Update Mode. If any exist, enter play
+   mode before the first change - values tuned in edit mode against a hand-copied state land far off.
+2. **Fixed camera poses.** Capture with `scripts/ref-shot-capture.cs` from named poses in a
+   `shots.json` next to the reference images (record a pose once with `record: "sceneview"` or
+   `"main"`), never from the player's live camera - a moving character or an enemy in frame makes
+   two rounds incomparable. It borrows the Main Camera for one synchronous render, updates the URP
+   Volume stack, forces sync shader compile for that frame, and cleans up.
+3. **Compare side by side every round.** `python scripts/ref-compare.py current.png ref.png --before
+   first.png --out Temp/cmp.png` prints region and grid scores and writes a current | ref | before |
+   diff sheet. Open the sheet first; the numbers plateau while a large miss (a shadow pattern, a
+   missing layer) is obvious side by side.
+4. **A change that shows nothing:** capture an A/B before turning the value further - `toggle:` flips
+   one object for a `_A`/`_B` pair, or capture top-down where the effect is easiest to see. Usually
+   the field is the wrong one (see the engine's quirks, e.g. `vfx-environment`
+   `reference/urp-environment-traps.md`).
+5. **Play-mode edits vanish on exit.** Keep every value you settle in a list as you go, exit, reapply
+   them in edit mode with Undo, save, and capture once more in play mode to confirm the saved state.
+6. **Never reimport or regenerate a texture, shader or mesh that is in use while in play mode**
+   (a cookie the sun is using, a sky shader, terrain prototypes). Tune runtime parameters (material
+   properties, light fields) in play mode; regenerate assets in edit mode. Reimporting under a live
+   GPU resource is the likeliest cause of `SetTextures`/`OpenResource` driver crashes.
+7. Global settings (sun, sky, fog, Volume profile, the pipeline asset) change every area and every
+   scene that shares them. Name them in the report and list the areas you did not look at.
+
+## Rule 8 - The bridge drops; tell a reload from a crash
+
+- Entering or leaving play mode and every recompile drop the Editor bridge for about 5-25 s. Poll
+  `editor-application-get-state` every few seconds with a timeout instead of guessing a sleep; one
+  tool (often `script-execute`) can report "not connected" a few seconds after the others are back -
+  retry it.
+- A timeout from `assets-refresh` or a bridge that stays down for over a minute is not "wait longer":
+  check that the Unity process is still alive and whether a new folder appeared under
+  `%LOCALAPPDATA%\Temp\Unity\Editor\Crashes` (macOS: `~/Library/Logs/Unity`). If it crashed, read
+  the stack in that folder's `Editor.log` before restarting, and tell the user.
+- Before a compile or refresh late in a long session (many play-mode round trips, many captures):
+  save everything, run `EditorUtility.UnloadUnusedAssetsImmediate()`, and if the session has been
+  heavy, suggest an Editor restart first.
+- Save and enter play mode in the same call when a scene's `OnValidate` re-dirties it - otherwise
+  the play-mode entry stops on an unsaved-scene prompt.
+
+## Scripts
+
+Run with `script-execute`, `isMethodBody: false`; each file's header gives `className`/`methodName`
+and parameters (or edit its FILL-IN and call `Main`).
+
+- `scripts/solo-focus.cs` - select, ping, frame (`close` / `wide` / `keep`) and repaint, with a
+  bounds check (tiny, huge, hidden, inactive).
+- `scripts/ref-shot-capture.cs` - game-camera PNG from a named pose in `shots.json`, optional A/B
+  toggle, records poses, leaks nothing.
+- `scripts/ref-compare.py` - region + 40x18 grid scores and the side-by-side sheet (Pillow, numpy).

@@ -23,7 +23,7 @@ there. A project's own `CLAUDE.md`, `AGENTS.md` or project skills win on conflic
 | commit, version bump, tag, release | `/release` | |
 | adding or changing an analytics event | `/tracking` | |
 | writing a plan for another agent to execute | `/handoff` | |
-| working alone in the Editor while the user watches the Scene view | `/solo` | |
+| working alone in the Editor while the user watches the Scene view | `/solo` | `scripts/solo-focus.cs`, `scripts/ref-shot-capture.cs`, `scripts/ref-compare.py` |
 | editing a Google data sheet with `n_`/`s_`/`f_` headers | `/sheet-data` | `scripts/sheet_data.py` |
 
 ## unity-ui (if installed)
@@ -41,7 +41,7 @@ there. A project's own `CLAUDE.md`, `AGENTS.md` or project skills win on conflic
 | any particle, shader or effect work | `/vfx-core` | `reference/brief.md`, `reference/uber-material.md`, `reference/recipes.md`, `scripts/*.cs` |
 | combat effects: skills, hits, projectiles, AoE | `/vfx-core` + `/vfx-combat` | `scripts/vfx-fit.cs` |
 | effects inside a Canvas | `/vfx-core` + `/vfx-ui` | |
-| ambient, weather, water, fire props, fog | `/vfx-core` + `/vfx-environment` | |
+| ambient, weather, water, fire props, fog, sky and sun look | `/vfx-core` + `/vfx-environment` | `reference/urp-environment-traps.md` |
 | garment and outfit effects | `/vfx-core` + `/vfx-clothing` | `reference/garment-effect.cs` |
 
 ## Editor tools (optional)

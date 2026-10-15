@@ -1,6 +1,6 @@
 ---
 name: coding
-description: Mandatory coding standard for ALL C# script work in any Unity project - gameplay, systems, editor tooling, refactors, and any non-trivial edit (UI code also follows ui-panel on top of this, when installed). Enforces minimalism, reuse-first (never duplicate a capability - timing, events, saving, async, config - that a shared system already provides), region grouping by concern, the leniency ladder, the near-zero comment policy, and Initialize() as the single init convention. Trigger on any request to write, add, refactor, fix, or review C# in a Unity project.
+description: Mandatory coding standard for ALL C# script work in any Unity project - gameplay, systems, editor tooling, refactors, and any non-trivial edit (UI code also follows ui-panel on top of this, when installed). Enforces minimalism, reuse-first (never duplicate a capability - timing, events, saving, async, config - that a shared system already provides), region grouping by concern, the leniency ladder, the near-zero comment policy, and one init convention (the name the project's CLAUDE.md sets, else Initialize()). Trigger on any request to write, add, refactor, fix, or review C# in a Unity project.
 ---
 
 # Unity coding standard
@@ -87,9 +87,11 @@ UI code follows its own stricter rule in `ui-panel`. All other C#:
 - A comment adds **new** information. Never restate what the name already says.
 - Never delete or rewrite comments that already exist unless the user asks, and never translate them.
 
-## Rule 6 - Initialization is `Initialize()`
+## Rule 6 - One init name: the project's, else `Initialize()`
 
-`Initialize(...)` is the single init convention across the project.
+Use the init method name the project's `CLAUDE.md` (or `AGENTS.md`) names - for example `SetInfo()`.
+Only when it names none, `Initialize(...)` is the single init convention. Everything below applies to
+whichever name the project uses; "`Initialize`" stands for it.
 
 - A class takes its data and dependencies through `Initialize(...)`: validate the input against the
   ladder, load save state, arm timers, build children, bind listeners idempotently. Guard a one-time
@@ -98,10 +100,12 @@ UI code follows its own stricter rule in `ui-panel`. All other C#:
   from `Awake()`. A class the chain never reaches is a bug - nothing initializes it.
 - Repeated `Initialize` must be safe: listeners cannot double-subscribe, child lists cannot grow.
 
-Two retired names, never reintroduced: `StartClass` and `SetInfo`. `SetInfo` in particular is a trap
-when the project's UI framework base class already declares a no-arg `SetInfo()` it tells you never
-to override - an overload piled on top of it is easy to call by mistake. Existing members still named `SetInfo` or `StartClass` are renamed only when you
-already have the file open for another reason (Rule 1, migrate only what you touch).
+With the default `Initialize`, two retired names are never reintroduced: `StartClass` and `SetInfo`.
+`SetInfo` in particular is a trap when the project's UI framework base class already declares a no-arg
+`SetInfo()` it tells you never to override - an overload piled on top of it is easy to call by
+mistake. Existing members still named `SetInfo` or `StartClass` are renamed only when you already have
+the file open for another reason (Rule 1, migrate only what you touch). A project that names its own
+init keeps it: never rename its members to `Initialize`.
 
 ## Compiling
 

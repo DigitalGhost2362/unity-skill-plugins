@@ -96,6 +96,9 @@ Add to the `vfx-core` brief:
   weather intensity) set once per frame or on change through `Shader.SetGlobal*` and one manager -
   fireflies appear at dusk because the global says night, not because each emitter checks a clock.
 - Per-instance variation through the seed and start delay, not material copies.
+- Sky, sun, fog and post in URP: read `reference/urp-environment-traps.md` before tuning - Volume
+  stacks that only update from script, the directional cookie size field, async shader compile in
+  captures.
 
 ## Budget
 
