@@ -22,6 +22,7 @@ form `/unity-core:coding` always works.
 | `/release` | `plugins/unity-core/skills/release/SKILL.md` | commit, version bump, tag, release |
 | `/tracking` | `plugins/unity-core/skills/tracking/SKILL.md` | adding or changing an analytics event |
 | `/handoff` | `plugins/unity-core/skills/handoff/SKILL.md` | writing a plan and prompt for another agent to execute |
+| `/solo` | `plugins/unity-core/skills/solo/SKILL.md` | working alone in the Editor, every change shown live in the Scene view for the user to steer |
 | `/sheet-data` | `plugins/unity-core/skills/sheet-data/SKILL.md` | editing or formatting a Google data sheet with `n_`/`s_`/`f_` headers |
 
 ### `unity-ui` - uGUI work
@@ -32,8 +33,23 @@ form `/unity-core:coding` always works.
 | `/ui-from-image` | `plugins/unity-ui/skills/ui-from-image/SKILL.md` | building a panel prefab from a mockup image |
 | `/brainstorm` | `plugins/unity-ui/skills/brainstorm/SKILL.md` | choosing how a UI effect or animation looks |
 
-A project that does no UI work only needs `unity-core`. A project can ship its own skills on top of
-these; the project skill wins on conflict.
+### `unity-vfx` - real-time effects
+
+| Skill | Path | Use before |
+|---|---|---|
+| `/vfx-core` | `plugins/unity-vfx/skills/vfx-core/SKILL.md` | any particle or effect work; the domain skills build on it |
+| `/vfx-combat` | `plugins/unity-vfx/skills/vfx-combat/SKILL.md` | skills, hits, projectiles, AoE telegraphs, buffs |
+| `/vfx-ui` | `plugins/unity-vfx/skills/vfx-ui/SKILL.md` | particles and shader effects inside a Canvas |
+| `/vfx-environment` | `plugins/unity-vfx/skills/vfx-environment/SKILL.md` | ambient, weather, water, fire props, fog |
+| `/vfx-clothing` | `plugins/unity-vfx/skills/vfx-clothing/SKILL.md` | garment shaders, outfit auras, reveals and swaps |
+
+`vfx-core` ships a URP uber shader (`assets/VFX_Uber.shader`) and Editor scripts run through
+`script-execute`: build an effect prefab, audit prefabs, measure real overdraw in full-screen
+equivalents (FSE), capture a contact sheet, and generate textures and meshes. `vfx-combat` adds a
+top-down check of an effect's reach against its damage shape.
+
+A project that does no UI work only needs `unity-core`; install `unity-vfx` where effects are made.
+A project can ship its own skills on top of these; the project skill wins on conflict.
 
 ## Skill index hook
 
@@ -63,6 +79,7 @@ On Windows the hook needs Git for Windows. Without bash it exits quietly and onl
 claude plugin marketplace add https://github.com/BingoBoiz/unity-skill-plugins.git
 claude plugin install unity-core@dh-skills
 claude plugin install unity-ui@dh-skills
+claude plugin install unity-vfx@dh-skills
 ```
 
 Auto-update is off by design (see below), so nothing changes under you.
@@ -77,13 +94,14 @@ cd unity-skill-plugins
 powershell -ExecutionPolicy Bypass -File .\scripts\setup-codex.ps1
 ```
 
-It installs both plugins; pass `-Plugins unity-core` for the core plugin only. The manual
+It installs every plugin; pass `-Plugins unity-core` (or any list) to choose. The manual
 equivalent:
 
 ```text
 codex plugin marketplace add <absolute-path-to-this-repo>
 codex plugin add unity-core@dh-skills
 codex plugin add unity-ui@dh-skills
+codex plugin add unity-vfx@dh-skills
 ```
 
 Codex requires one safety review for plugin hooks: open Codex, run `/hooks`, review and trust the
@@ -130,6 +148,7 @@ publishing it. `/reload-plugins` picks up further edits without a restart. Valid
 claude plugin validate .
 claude plugin validate ./plugins/unity-core
 claude plugin validate ./plugins/unity-ui
+claude plugin validate ./plugins/unity-vfx
 ```
 
 Scripts bundled with a skill are addressed through `${CLAUDE_SKILL_DIR}`. A plugin cannot reference

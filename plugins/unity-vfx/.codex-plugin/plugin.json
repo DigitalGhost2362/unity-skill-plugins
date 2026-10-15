@@ -1,0 +1,28 @@
+{
+  "name": "unity-vfx",
+  "version": "0.1.0",
+  "description": "Real-time VFX for Unity, mobile-first: a shared core (brief, mesh-first, FSE overdraw budgets, uber material, audit and measurement scripts) plus combat, UI, environment and clothing skills.",
+  "homepage": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "repository": "https://github.com/BingoBoiz/unity-skill-plugins",
+  "license": "UNLICENSED",
+  "keywords": [
+    "unity",
+    "vfx",
+    "particles",
+    "shader",
+    "mobile",
+    "overdraw"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Unity VFX",
+    "shortDescription": "Combat, UI, environment and clothing VFX",
+    "longDescription": "Mobile-first Unity VFX: effect brief and references, mesh-first construction, measured FSE overdraw, one uber material with a vertex-stream contract, and domain rules for combat, UI, environment and clothing effects.",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Make a hit effect for this skill that matches its damage radius.",
+      "Audit and measure the overdraw of this effect prefab."
+    ]
+  }
+}

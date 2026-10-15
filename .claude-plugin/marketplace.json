@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "dh-skills",
-  "description": "Unity skills for Claude Code and Codex: a core plugin for every role and a uGUI plugin. Works with or without an Editor MCP bridge.",
+  "description": "Unity skills for Claude Code and Codex: a core plugin for every role, a uGUI plugin and a VFX plugin. Works with or without an Editor MCP bridge.",
   "owner": {
     "name": "dh-skills",
     "url": "https://github.com/BingoBoiz/unity-skill-plugins"
@@ -16,6 +16,11 @@
       "name": "unity-ui",
       "source": "./plugins/unity-ui",
       "description": "uGUI workflow for Unity: panel lifecycle and layout rules, building a panel prefab from a mockup image, and brainstorming UI effects as an HTML preview."
+    },
+    {
+      "name": "unity-vfx",
+      "source": "./plugins/unity-vfx",
+      "description": "Real-time VFX for Unity, mobile-first: a shared core (brief, mesh-first, FSE overdraw budgets, uber material, audit and measurement scripts) plus combat, UI, environment and clothing skills."
     }
   ]
 }

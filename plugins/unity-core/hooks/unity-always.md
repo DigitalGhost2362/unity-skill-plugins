@@ -23,6 +23,7 @@ there. A project's own `CLAUDE.md`, `AGENTS.md` or project skills win on conflic
 | commit, version bump, tag, release | `/release` | |
 | adding or changing an analytics event | `/tracking` | |
 | writing a plan for another agent to execute | `/handoff` | |
+| working alone in the Editor while the user watches the Scene view | `/solo` | |
 | editing a Google data sheet with `n_`/`s_`/`f_` headers | `/sheet-data` | `scripts/sheet_data.py` |
 
 ## unity-ui (if installed)
@@ -33,10 +34,20 @@ there. A project's own `CLAUDE.md`, `AGENTS.md` or project skills win on conflic
 | building UI from a mockup image | `/ui-from-image` | `reference/project-facts-template.md` |
 | choosing how a UI effect or animation looks | `/brainstorm` | `reference/fx-vocabulary.md` |
 
+## unity-vfx (if installed)
+
+| Before | Skill | Docs inside the skill |
+|---|---|---|
+| any particle, shader or effect work | `/vfx-core` | `reference/brief.md`, `reference/uber-material.md`, `reference/recipes.md`, `scripts/*.cs` |
+| combat effects: skills, hits, projectiles, AoE | `/vfx-core` + `/vfx-combat` | `scripts/vfx-fit.cs` |
+| effects inside a Canvas | `/vfx-core` + `/vfx-ui` | |
+| ambient, weather, water, fire props, fog | `/vfx-core` + `/vfx-environment` | |
+| garment and outfit effects | `/vfx-core` + `/vfx-clothing` | `reference/garment-effect.cs` |
+
 ## Editor tools (optional)
 
 The workflow skills name tools of an Editor MCP bridge (`script-execute`, `assets-refresh`,
 `console-get-logs`, ...). A tool missing from your list may only be disabled; ask the bridge to list
 and enable it. With no bridge connected, write files with the file tools, follow the offline route in
 `/recompile`, and say plainly that nothing was compiled or played. If a shared-Editor skill is
-installed, invoke it before play mode, a compile or a scene open.
+installed, invoke it before play mode, a compile or a scene open - unless `/solo` is active.

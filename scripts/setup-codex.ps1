@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string[]]$Plugins = @('unity-core', 'unity-ui')
+    [string[]]$Plugins = @('unity-core', 'unity-ui', 'unity-vfx')
 )
 
 $ErrorActionPreference = 'Stop'

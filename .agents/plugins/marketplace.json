@@ -27,6 +27,18 @@
         "authentication": "ON_INSTALL"
       },
       "category": "DeveloperTools"
+    },
+    {
+      "name": "unity-vfx",
+      "source": {
+        "source": "local",
+        "path": "./plugins/unity-vfx"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "DeveloperTools"
     }
   ]
 }
