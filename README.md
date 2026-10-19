@@ -195,8 +195,10 @@ claude plugin validate ./plugins/unity-ui
 claude plugin validate ./plugins/unity-vfx
 ```
 
-No plugin declares a `version`, so the marketplace commit is the version: once a change is pushed,
-**Check for updates** then **Update** puts every machine on the same rules. Auto-update stays off so
+Every plugin declares a `version` (SemVer, the same number in `.claude-plugin/plugin.json` and
+`.codex-plugin/plugin.json`), and installed copies are keyed by it. A change to a plugin bumps its
+version in the same commit; without the bump, **Update** finds nothing new. Once a bumped change is
+pushed, **Check for updates** then **Update** puts every machine on the same rules. Auto-update stays off so
 nothing changes mid-task; on a machine that also runs the Claude Code CLI, `~/.claude/settings.json`
 carries:
 

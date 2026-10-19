@@ -80,6 +80,16 @@ Carve out only the files where non-ASCII is deliberate and say why in the projec
 - A save-payload change also bumps that payload's `Version` field and ships either a migration or an
   explicit logged reset.
 - `package.json` version and the CHANGELOG entry change in the same commit as the code.
+- A repo that ships Claude Code or Codex plugins bumps `version` in every plugin it changed, in the
+  same commit, and keeps `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` on the same
+  number. Installed copies are keyed by that version: an unchanged number means **Update** finds
+  nothing new, even after the change is pushed. Check before committing:
+
+  ```sh
+  git diff --cached --name-only -- 'plugins/*' | cut -d/ -f2 | sort -u | while read p; do
+    git diff --cached --quiet -- "plugins/$p/.claude-plugin/plugin.json" && echo "NO VERSION BUMP: $p"
+  done   # must print nothing
+  ```
 - Consumers reference the tag in the git URL:
   `https://<host>/<owner>/<repo>.git?path=Packages/<package>#vX.Y.Z`.
 
