@@ -13,35 +13,35 @@ form `/unity-core:coding` always works.
 
 ### `unity-core` - every role on a Unity project
 
-| Skill | Path | Use before |
-|---|---|---|
-| `/coding` | `plugins/unity-core/skills/coding/SKILL.md` | writing, fixing or reviewing any C# |
-| `/recompile` | `plugins/unity-core/skills/recompile/SKILL.md` | any recompile or play-mode round trip |
-| `/verify` | `plugins/unity-core/skills/verify/SKILL.md` | reporting a task done, reproducing a bug in play mode |
-| `/docs` | `plugins/unity-core/skills/docs/SKILL.md` | tracked README, CHANGELOG, package.json, feature specs |
-| `/release` | `plugins/unity-core/skills/release/SKILL.md` | commit, version bump, tag, release |
-| `/tracking` | `plugins/unity-core/skills/tracking/SKILL.md` | adding or changing an analytics event |
-| `/handoff` | `plugins/unity-core/skills/handoff/SKILL.md` | writing a plan and prompt for another agent to execute |
-| `/solo` | `plugins/unity-core/skills/solo/SKILL.md` | working alone in the Editor, every change shown live in the Scene view for the user to steer |
-| `/sheet-data` | `plugins/unity-core/skills/sheet-data/SKILL.md` | editing or formatting a Google data sheet with `n_`/`s_`/`f_` headers |
+| Skill | Use before |
+|---|---|
+| [`/coding`](plugins/unity-core/skills/coding/SKILL.md) | writing, fixing or reviewing any C# |
+| [`/recompile`](plugins/unity-core/skills/recompile/SKILL.md) | any recompile or play-mode round trip |
+| [`/verify`](plugins/unity-core/skills/verify/SKILL.md) | a play test the user asked for, reproducing a bug in play mode |
+| [`/docs`](plugins/unity-core/skills/docs/SKILL.md) | tracked README, CHANGELOG, package.json, feature specs |
+| [`/release`](plugins/unity-core/skills/release/SKILL.md) | commit, version bump, tag, release |
+| [`/tracking`](plugins/unity-core/skills/tracking/SKILL.md) | adding or changing an analytics event |
+| [`/handoff`](plugins/unity-core/skills/handoff/SKILL.md) | writing a plan and prompt for another agent to execute |
+| [`/solo`](plugins/unity-core/skills/solo/SKILL.md) | working alone in the Editor, every change shown live in the Scene view for the user to steer |
+| [`/sheet-data`](plugins/unity-core/skills/sheet-data/SKILL.md) | editing or formatting a Google data sheet with `n_`/`s_`/`f_` headers |
 
 ### `unity-ui` - uGUI work
 
-| Skill | Path | Use before |
-|---|---|---|
-| `/ui-panel` | `plugins/unity-ui/skills/ui-panel/SKILL.md` | any panel, popup, widget, button or HUD element |
-| `/ui-from-image` | `plugins/unity-ui/skills/ui-from-image/SKILL.md` | building a panel prefab from a mockup image |
-| `/brainstorm` | `plugins/unity-ui/skills/brainstorm/SKILL.md` | choosing how a UI effect or animation looks |
+| Skill | Use before |
+|---|---|
+| [`/ui-panel`](plugins/unity-ui/skills/ui-panel/SKILL.md) | any panel, popup, widget, button or HUD element |
+| [`/ui-from-image`](plugins/unity-ui/skills/ui-from-image/SKILL.md) | building a panel prefab from a mockup image |
+| [`/brainstorm`](plugins/unity-ui/skills/brainstorm/SKILL.md) | choosing how a UI effect or animation looks |
 
 ### `unity-vfx` - real-time effects
 
-| Skill | Path | Use before |
-|---|---|---|
-| `/vfx-core` | `plugins/unity-vfx/skills/vfx-core/SKILL.md` | any particle or effect work; the domain skills build on it |
-| `/vfx-combat` | `plugins/unity-vfx/skills/vfx-combat/SKILL.md` | skills, hits, projectiles, AoE telegraphs, buffs |
-| `/vfx-ui` | `plugins/unity-vfx/skills/vfx-ui/SKILL.md` | particles and shader effects inside a Canvas |
-| `/vfx-environment` | `plugins/unity-vfx/skills/vfx-environment/SKILL.md` | ambient, weather, water, fire props, fog |
-| `/vfx-clothing` | `plugins/unity-vfx/skills/vfx-clothing/SKILL.md` | garment shaders, outfit auras, reveals and swaps |
+| Skill | Use before |
+|---|---|
+| [`/vfx-core`](plugins/unity-vfx/skills/vfx-core/SKILL.md) | any particle or effect work; the domain skills build on it |
+| [`/vfx-combat`](plugins/unity-vfx/skills/vfx-combat/SKILL.md) | skills, hits, projectiles, AoE telegraphs, buffs |
+| [`/vfx-ui`](plugins/unity-vfx/skills/vfx-ui/SKILL.md) | particles and shader effects inside a Canvas |
+| [`/vfx-environment`](plugins/unity-vfx/skills/vfx-environment/SKILL.md) | ambient, weather, water, fire props, fog |
+| [`/vfx-clothing`](plugins/unity-vfx/skills/vfx-clothing/SKILL.md) | garment shaders, outfit auras, reveals and swaps |
 
 `vfx-core` ships a URP uber shader (`assets/VFX_Uber.shader`) and Editor scripts run through
 `script-execute`: build an effect prefab, audit prefabs, measure real overdraw in full-screen
@@ -73,16 +73,40 @@ Wiring:
 
 On Windows the hook needs Git for Windows. Without bash it exits quietly and only the index is lost.
 
-## Install - Claude Code
+## Install - Claude Desktop
 
-```bash
-claude plugin marketplace add https://github.com/BingoBoiz/unity-skill-plugins.git
-claude plugin install unity-core@dh-skills
-claude plugin install unity-ui@dh-skills
-claude plugin install unity-vfx@dh-skills
-```
+Once per machine. Every step is a click in the Claude Desktop app.
 
-Auto-update is off by design (see below), so nothing changes under you.
+1. Click the `</>` (Code) button at the top of the sidebar, then **Customize**.
+
+   ![Code, then Customize](docs/images/claude-desktop/01-open-customize.png)
+
+2. Open the **Plugins** tab and click **Discover**.
+
+   ![Plugins tab, then Discover](docs/images/claude-desktop/02-plugins-discover.png)
+
+3. In the Directory window, open the **Code** tab and click **+**.
+
+   ![Code tab, then +](docs/images/claude-desktop/11-add-marketplace.png)
+
+4. Click **Add from a repository**.
+
+   ![Add from a repository](docs/images/claude-desktop/12-add-from-repository.png)
+
+5. Paste `BingoBoiz/unity-skill-plugins` into **URL**, pick the **Use "BingoBoiz/unity-skill-plugins"**
+   line under it, then click **Sync**.
+
+   ![URL, then Sync](docs/images/claude-desktop/13-repo-sync.png)
+
+6. A **dh-skills** row appears in the **Code** tab with three cards. Click the **+** on **Unity
+   core**, **Unity ui** and **Unity vfx**, and confirm if asked. An installed card shows a gear
+   instead of **+**. A project with no UI work only needs **Unity core**.
+
+   ![The three installed plugins](docs/images/claude-desktop/14-installed-plugins.png)
+
+7. Click **New** in the sidebar. Only sessions started after the install see the skills.
+
+   ![New session](docs/images/claude-desktop/07-new-session.png)
 
 ## Install - Codex
 
@@ -107,22 +131,41 @@ codex plugin add unity-vfx@dh-skills
 Codex requires one safety review for plugin hooks: open Codex, run `/hooks`, review and trust the
 `unity-core` `SessionStart` hook, then start a new task from the Unity project root.
 
-## Update - Claude Code
+## Update - Claude Desktop
 
-Updates are pulled on demand only:
+Nothing updates on its own. Run this whenever you are told a new version is out.
 
-```
-/plugin marketplace update dh-skills
-```
+1. Click the `</>` (Code) button at the top of the sidebar, then **Customize**.
 
-No plugin declares a `version`, so the marketplace commit is the version: one `git push` here, one
-`marketplace update` there, and every machine is on the same rules.
+   ![Code, then Customize](docs/images/claude-desktop/01-open-customize.png)
 
-To keep auto-update off, `~/.claude/settings.json` carries:
+2. Open the **Plugins** tab and click **Discover**.
 
-```json
-{ "env": { "CLAUDE_CODE_PLUGIN_DISABLE_AUTO_UPDATE": "1" } }
-```
+   ![Plugins tab, then Discover](docs/images/claude-desktop/02-plugins-discover.png)
+
+3. In the Directory window, open the **Code** tab, click **...** next to **dh-skills**, then
+   **Check for updates**.
+
+   ![Code tab, ..., Check for updates](docs/images/claude-desktop/03-check-for-updates.png)
+
+4. Wait for **Marketplace updated.** in the bottom-right corner, then close the Directory window
+   with the **X** in its top-right corner.
+
+   ![Marketplace updated.](docs/images/claude-desktop/04-marketplace-updated.png)
+
+5. Back on the **Plugins** tab, click **Unity core**.
+
+   ![Click a plugin](docs/images/claude-desktop/05-open-plugin.png)
+
+6. Click **Update**. A greyed-out **Update** whose tooltip reads **On latest version** means there is
+   nothing new for that plugin. Click **Your plugins** to go back, then repeat steps 5 and 6 for
+   **Unity ui** and **Unity vfx**.
+
+   ![Update button](docs/images/claude-desktop/06-update-button.png)
+
+7. Click **New** in the sidebar. A session that was already open keeps the old version.
+
+   ![New session](docs/images/claude-desktop/07-new-session.png)
 
 ## Update - Codex
 
@@ -149,6 +192,15 @@ claude plugin validate .
 claude plugin validate ./plugins/unity-core
 claude plugin validate ./plugins/unity-ui
 claude plugin validate ./plugins/unity-vfx
+```
+
+No plugin declares a `version`, so the marketplace commit is the version: once a change is pushed,
+**Check for updates** then **Update** puts every machine on the same rules. Auto-update stays off so
+nothing changes mid-task; on a machine that also runs the Claude Code CLI, `~/.claude/settings.json`
+carries:
+
+```json
+{ "env": { "CLAUDE_CODE_PLUGIN_DISABLE_AUTO_UPDATE": "1" } }
 ```
 
 Scripts bundled with a skill are addressed through `${CLAUDE_SKILL_DIR}`. A plugin cannot reference

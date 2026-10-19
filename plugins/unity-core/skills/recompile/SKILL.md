@@ -24,7 +24,7 @@ Everything below assumes it is **not** installed, which is the common case. Cons
 
 | Change | What to do |
 |---|---|
-| Any `.cs` edit — method body, new field, new type, signature, enum, asmdef | Stop play mode → write the file → refresh → check console → start play mode |
+| Any `.cs` edit — method body, new field, new type, signature, enum, asmdef | Stop play mode → write the file → refresh → check console (→ start play mode only if the user asked for a play test) |
 | Serialized field added/removed/renamed | Same, plus re-check the prefab/scene inspector: Unity may drop the old value |
 | Prefab / scene / ScriptableObject edit only (no `.cs`) | No recompile. Use the `gameobject-*` / `assets-modify` tools directly |
 | Inspector value tweak during play mode | No recompile, but the value is lost when play mode stops unless you copy the component |
@@ -36,13 +36,13 @@ Preferred, because it validates before it writes:
 
 1. `script-update-or-create` — Roslyn-validates the C#, rejects invalid code without touching the file, writes it, refreshes the AssetDatabase, and delivers the post-compilation result via `requestId`.
 2. `console-get-logs` — confirm zero compile errors before doing anything else.
-3. `editor-application-set-state` — enter play mode. It **throws if the project has compilation errors**, so step 2 is not optional.
+3. `editor-application-set-state` — enter play mode, only if the user asked for a play test. It **throws if the project has compilation errors**, so step 2 is not optional.
 
 When you edited files on the filesystem instead (Write/Edit, or a bulk `sed`):
 
 1. `assets-refresh` — forces the import + script compilation.
 2. `console-get-logs`.
-3. `editor-application-set-state`.
+3. `editor-application-set-state`, only if the user asked for a play test.
 
 Never call `editor-application-set-state` to start play mode as the first action after an edit — you will either run stale code or hit the compile-error throw.
 

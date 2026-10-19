@@ -254,4 +254,4 @@ per-widget `PlayIntro(delay)` calls made from the panel.
 - [ ] No comments, summaries, or tooltips added.
 - [ ] New panel ships `[Button, DisableInEditorMode]` debug methods covering every implemented feature.
 - [ ] Every repeated cell/slot is an instance of a template prefab (dynamic-list instance authored inactive; fixed-board instances authored active and wired in order into the panel's serialized `List<>`), never a plain child.
-- [ ] Recompiled and console-checked per `recompile`, then verified in play mode per `verify` - or explicitly reported as not run.
+- [ ] Recompiled and console-checked per `recompile`; play-tested per `verify` only if the user asked, otherwise reported as not play-tested.

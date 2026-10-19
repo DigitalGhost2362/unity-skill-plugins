@@ -10,7 +10,21 @@ there. A project's own `CLAUDE.md`, `AGENTS.md` or project skills win on conflic
   the project's existing owner of it.
 - Never hand-write a `.prefab` or `.unity` file, and never read one whole. Go through the Editor.
 - A `.cs` edit is not live until it is recompiled and the console has been read.
-- Done means proven in play mode, or say plainly that it was not.
+- Play-test only when the user asks for it (play test, verify, reproduce a bug). Otherwise never
+  enter play mode to check your work; just report that it was not play-tested.
+
+## End of every report
+
+The last line of a turn that did Unity work is one status line, nothing after it:
+
+`Kế hoạch ✅ · Sửa trong Unity ✅ · Playtest ❌ (chưa yêu cầu)`
+
+- **Kế hoạch**: the plan, task list or docs for the task.
+- **Sửa trong Unity**: code and assets (prefabs, scenes, data). ✅ only when the Editor recompiled
+  with a clean console and every scene/prefab change is saved. An offline compile check, a pending
+  test case or an unsaved scene is ❌.
+- **Playtest**: ✅ only with play-mode evidence from this turn.
+- ❌ always carries a reason of a few words in parentheses. Use ➖ for a part the task did not need.
 
 ## unity-core
 
@@ -18,7 +32,7 @@ there. A project's own `CLAUDE.md`, `AGENTS.md` or project skills win on conflic
 |---|---|---|
 | writing, fixing or reviewing any C# | `/coding` | |
 | any recompile or play-mode round trip | `/recompile` | |
-| reporting a task done, reproducing a bug | `/verify` | |
+| a play test the user asked for, reproducing a bug | `/verify` | |
 | tracked README, CHANGELOG, package.json, specs | `/docs` | |
 | commit, version bump, tag, release | `/release` | |
 | adding or changing an analytics event | `/tracking` | |

@@ -1,12 +1,12 @@
 ---
 name: verify
-description: Runbook for proving Unity behavior in play mode through the MCP bridge - preconditions and the Editor focus trap, reaching a clean state, driving features from script-execute, calling debug buttons (public or by reflection), what evidence to collect, and the three standing passes (re-entry, null-reference, null-callback). Use whenever a task must be proven rather than argued, when running a feature checklist, when reproducing a state/timer/save bug, and before reporting ANY Unity task done. Covers behavior; layout verification lives in ui-from-image.
+description: Runbook for proving Unity behavior in play mode through the MCP bridge - preconditions and the Editor focus trap, reaching a clean state, driving features from script-execute, calling debug buttons (public or by reflection), what evidence to collect, and the three standing passes (re-entry, null-reference, null-callback). Use only when the user asks for a play test, a verification or a feature checklist run, or to reproduce a state/timer/save bug; never on your own just to report a task done. Covers behavior; layout verification lives in ui-from-image.
 ---
 
 # Play-mode verification
 
-A Unity task is done when the Editor produced evidence for it, or when you state plainly that it was
-not verified. Recompiling is `recompile`'s job - do that first, then come here.
+Run this only when the user asked for a play test. Without that ask, skip it and report the task as
+not play-tested. Recompiling is `recompile`'s job - do that first, then come here.
 
 ## Rule 0 - Preconditions, in order
 
