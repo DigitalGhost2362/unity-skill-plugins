@@ -22,6 +22,7 @@ form `/unity-core:coding` always works.
 | [`/release`](plugins/unity-core/skills/release/SKILL.md) | commit, version bump, tag, release |
 | [`/tracking`](plugins/unity-core/skills/tracking/SKILL.md) | adding or changing an analytics event |
 | [`/handoff`](plugins/unity-core/skills/handoff/SKILL.md) | writing a plan and prompt for another agent to execute |
+| [`/review-loop`](plugins/unity-core/skills/review-loop/SKILL.md) | an implement -> gate -> review loop where the worker never grades itself, at a strictness level you pick for the time you have; a visual track for matching a reference image (triage, frozen shots, measured gates, blind pair judge, pivot rule) |
 | [`/solo`](plugins/unity-core/skills/solo/SKILL.md) | working alone in the Editor, every change shown live in the Scene view for the user to steer |
 | [`/sheet-data`](plugins/unity-core/skills/sheet-data/SKILL.md) | editing or formatting a Google data sheet with `n_`/`s_`/`f_` headers |
 

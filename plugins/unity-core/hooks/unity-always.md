@@ -37,6 +37,7 @@ The last line of a turn that did Unity work is one status line, nothing after it
 | commit, version bump, tag, release | `/release` | |
 | adding or changing an analytics event | `/tracking` | |
 | writing a plan for another agent to execute | `/handoff` | |
+| an implement -> review loop graded before "done" (level gates/quick/standard/strict), or a loop matching a reference image | `/review-loop` | `reference/prompts.md`, `reference/visual.md`, `scripts/loop_gate.py` |
 | working alone in the Editor while the user watches the Scene view | `/solo` | `scripts/solo-focus.cs`, `scripts/ref-shot-capture.cs`, `scripts/ref-compare.py` |
 | editing a Google data sheet with `n_`/`s_`/`f_` headers | `/sheet-data` | `scripts/sheet_data.py` |
 

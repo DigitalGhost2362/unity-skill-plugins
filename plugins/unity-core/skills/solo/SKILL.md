@@ -182,4 +182,5 @@ and parameters (or edit its FILL-IN and call `Main`).
   bounds check (tiny, huge, hidden, inactive).
 - `scripts/ref-shot-capture.cs` - game-camera PNG from a named pose in `shots.json`, optional A/B
   toggle, records poses, leaks nothing.
-- `scripts/ref-compare.py` - region + 40x18 grid scores and the side-by-side sheet (Pillow, numpy).
+- `scripts/ref-compare.py` - region + 40x18 grid scores and the side-by-side sheet (Pillow, numpy);
+  `--json` feeds review-loop's `metric` criteria.

@@ -1,7 +1,7 @@
 {
   "name": "unity-core",
   "version": "0.2.0",
-  "description": "Unity skills for every role on a Unity project: C# standard, recompile and play-mode verification, package docs, git release, analytics events, data sheets, plan handoff. Injects a skill index into sessions inside a Unity project.",
+  "description": "Unity skills for every role on a Unity project: C# standard, recompile and play-mode verification, package docs, git release, analytics events, data sheets, plan handoff, graded review loop. Injects a skill index into sessions inside a Unity project.",
   "homepage": "https://github.com/BingoBoiz/unity-skill-plugins",
   "repository": "https://github.com/BingoBoiz/unity-skill-plugins",
   "license": "UNLICENSED",
@@ -17,7 +17,7 @@
   "interface": {
     "displayName": "Unity Core",
     "shortDescription": "Shared Unity skills for every role",
-    "longDescription": "C# standard, recompile and play-mode verification, package docs, git release, analytics events, data sheets and plan handoff, with a skill index injected into every Unity session.",
+    "longDescription": "C# standard, recompile and play-mode verification, package docs, git release, analytics events, data sheets, plan handoff and a graded review loop, with a skill index injected into every Unity session.",
     "category": "Developer Tools",
     "capabilities": [],
     "defaultPrompt": [

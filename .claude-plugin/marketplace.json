@@ -10,7 +10,7 @@
     {
       "name": "unity-core",
       "source": "./plugins/unity-core",
-      "description": "Unity skills for every role on a Unity project: C# standard, recompile and play-mode verification, package docs, git release, analytics events, data sheets, plan handoff. Injects a skill index into sessions inside a Unity project."
+      "description": "Unity skills for every role on a Unity project: C# standard, recompile and play-mode verification, package docs, git release, analytics events, data sheets, plan handoff, graded review loop. Injects a skill index into sessions inside a Unity project."
     },
     {
       "name": "unity-ui",
