@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: Honest implement -> gate -> review -> fix loop for a Unity task, with a strictness level the user picks to fit the time they have - gates (deterministic checks only), quick (one fresh reviewer), standard (default - blind two-phase reviewer plus a refuter), strict (user-confirmed contract, play-mode evidence, a refuter per finding, a fresh implementer per round). The agent that writes the code never decides it is done - a frozen contract, a gate script (forbidden paths, scope, test count, cheat patterns, working-tree snapshot) and a fresh reviewer that never sees the implementer's summary do. A lower level runs fewer checks and reports what it skipped as unverified; it never lowers the bar for PASS. Work judged by looking - an effect, lighting or level dressing that must match a reference image or a before/after spec - runs the visual track: triage of the whole reference first, frozen camera shots, measured region and budget gates, a blind judge comparing this round with the best one, and a pivot rule that stops endless retuning. Use when the user asks for a review loop, "làm đến khi pass", "implement rồi review", "vòng lặp chấm", "chấm trung thực", "subagent chấm điểm", "sửa theo ảnh ref", "làm giống concept", "loop until green", "/review-loop quick|standard|strict", or wants work graded before it is called done.
+description: Honest implement -> gate -> review -> fix loop for a Unity task, with a strictness level the user picks to fit the time they have - gates (deterministic checks only), quick (one fresh reviewer), standard (default - blind two-phase reviewer plus a refuter), strict (user-confirmed contract, play-mode evidence, a refuter per finding, a fresh implementer per round). The agent that writes the code never decides it is done - a frozen contract, a gate script (forbidden paths, scope, test count, cheat patterns, working-tree snapshot) and a fresh reviewer that never sees the implementer's summary do. A lower level runs fewer checks and reports what it skipped as unverified; it never lowers the bar for PASS. Work judged by looking - an effect, lighting or level dressing that must match a reference image or a before/after spec - runs the visual track: triage of the whole reference first, frozen camera shots, measured region and budget gates, a blind judge comparing this round with the best one, and a pivot rule that stops endless retuning. Use when the user asks for a review loop, "làm đến khi pass", "implement rồi review", "vòng lặp chấm", "chấm trung thực", "subagent chấm điểm", "review ở thread riêng", "sửa theo ảnh ref", "làm giống concept", "loop until green", "/review-loop quick|standard|strict", or wants work graded before it is called done.
 ---
 
 # Review loop - the worker never grades itself
@@ -65,6 +65,37 @@ The user says stop, "chốt", "hết giờ": finish the tool call in flight, sta
 and `verdict` on what exists, and relay the block. It will usually say UNVERIFIED or FAIL; report it
 that way.
 
+## Where the roles run - subagents, or threads when asked
+
+Every fresh role - the `strict` implementer, the reviewer, the refuter, the visual judge - is a
+subagent by default. When the user's prompt asks for a separate thread or session ("thread riêng",
+"session riêng", "tách thread", "separate thread"), each role runs in its own thread instead, which
+the user can open, watch and prompt while it works. Only the user's words switch this. At `gates`,
+`quick` and `standard` you still implement in this thread, where the user already talks to you.
+
+In thread mode:
+
+- Start each role with the host's session tool (Claude Code desktop: `start_session`, initiation
+  `user_asked`, context `fresh`, `use_worktree: false` - it must see this working tree). Never fork:
+  a fork carries this chat, and this chat holds the implementer's account. With no tool that starts
+  a thread, use subagents and say so in your first line.
+- One new thread per role per round, titled `review-loop R<N> <role>` (`R2 reviewer`,
+  `R2 refuter F1`), linked for the user when it starts. Phase B goes to the same reviewer thread as a
+  follow-up message. At `strict`, the refuter threads start together, one per finding.
+- Send the template word for word plus the thread add-on in `reference/prompts.md`. The thread writes
+  its own output file under `.review-loop/` - outside the snapshot, so it does not trip the gate. Its
+  report back to you is cut short; the file is the result.
+- Then end your turn. Do not poll and do not do the role yourself meanwhile. When the host wakes you,
+  read the file; missing or not valid yet (the user is still talking to the thread) - wait for the
+  next wake.
+- The user's prompts inside a thread are welcome: a problem they point out saves the thread from
+  finding it. They do not change the rules: a reviewer still passes a criterion only on evidence it
+  produced itself, a finding still needs a failure scenario and still goes to the refuter, and
+  reviewer, refuter and judge stay read-only - a code change belongs in the implementer's thread, and
+  one made during review makes `verdict` STOP until `check` runs again.
+- Your own messages to a thread are the templates and nothing else - never the implementer's
+  account, a "done" line, or your reading of the diff.
+
 ## Step 0 - Contract and baseline
 
 Write `<repo>/.review-loop/contract.json`:
@@ -104,7 +135,8 @@ contract is frozen: changing it takes the user and a fresh `init`.
 ## Step 1 - Implement
 
 - `gates`, `quick`, `standard`: you implement, in this session.
-- `strict`: a fresh subagent with edit tools implements each round; you only orchestrate. When it
+- `strict`: a fresh agent with edit tools (a subagent, or a thread in thread mode) implements each
+  round; you only orchestrate. When it
   fails, never fix the code yourself and mark the round done.
 
 Use the implementer template; follow `coding` and `recompile`. **BLOCKED is a result, not a
@@ -133,9 +165,9 @@ failure**: stop the loop and give the user the BLOCKED block as written.
 
 ## Step 3 - Review (not at `gates`)
 
-The reviewer is a fresh subagent with no edit tools (in Claude Code, a read-only agent type; a
-general one told it is read-only also works, because `verdict` catches any file that changed after
-`check`). It gets the contract, `diff.patch`, `gate-<N>.json` and the raw evidence files - nothing
+The reviewer is a fresh agent with no edit tools (in Claude Code, a read-only agent type; a general
+one or a thread told it is read-only also works, because `verdict` catches any file that changed
+after `check`). It gets the contract, `diff.patch`, `gate-<N>.json` and the raw evidence files - nothing
 else. Never the implementer's summary, its reasoning, a "done" or "tests pass" line, or this chat.
 
 - `quick`: one pass with the quick template.
@@ -144,8 +176,8 @@ else. Never the implementer's summary, its reasoning, a "done" or "tests pass" l
   structure instead of a request.
 - `strict`: phase B also re-runs `<gate> check --verify` and reports any difference.
 
-Save its JSON verbatim as `.review-loop/review-<N>.json`. Do not tidy it - fixing a typo is editing
-the verdict.
+Save its JSON verbatim as `.review-loop/review-<N>.json` (a reviewer thread writes the file
+itself). Do not tidy it - fixing a typo is editing the verdict.
 
 ## Step 4 - Refute (`standard`, `strict`)
 

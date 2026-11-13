@@ -166,6 +166,27 @@ Return only:
   "evidence": "X: ... at (x0,y0,x1,y1). Y: ... at (...)", "blocked_by": null}]}
 ```
 
+## Thread add-on (thread mode only - append to any template above)
+
+Pick the output file from the table; `<file>` is the only slot.
+
+| Role | File |
+|---|---|
+| implementer | `impl-<N>.txt` |
+| reviewer, quick | `review-<N>.json` |
+| reviewer, phase A | `review-<N>-A.json` |
+| reviewer, phase B | `review-<N>.json` |
+| refuter | `refute-<N>.json` (strict: `refute-<N>-<finding id>.json`) |
+| visual judge | `judge-<N>.json` |
+
+```
+You run in your own thread, and the user may write to you while you work. Take what they point
+out into account, but every rule above still holds. When you finish, write exactly what this
+prompt says to return - nothing before or after it - to <repo>/.review-loop/<file>, and end your
+reply with that path. <all but the implementer:> That file is the only file you may create or
+change; if the user asks you to change code, tell them that belongs in the implementer's thread.
+```
+
 ## Stuck report (when the round cap or no-progress stop is hit)
 
 ```

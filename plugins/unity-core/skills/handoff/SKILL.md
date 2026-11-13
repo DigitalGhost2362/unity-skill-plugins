@@ -79,6 +79,8 @@ ONE fenced block, same repo, cold session, in this order:
 
 **Do not re-paste the plan body into this block.** Anything the repo already states, reference by path. Split into sequenced phases only when the task is genuinely too large for one.
 
+**The prompt never goes inside the plan file.** The plan file is written for the executing agent. The prompt is written for the user to paste, and it points the agent at the plan file. If the prompt is inside that file, the agent reads it a second time when it opens the file. It may also take orders meant for a different role as its own: a sub-agent can read the coordinator's "dispatch the lanes" line as an instruction to itself. Give the prompt in the chat reply. If the user asks for it on disk, save it as a separate file (`<Plan>_Prompt.md`) and do not reference that file from the plan.
+
 ### 8. Self-check
 
 - [ ] Repo skills discovered, read, and listed at the top of the handoff prompt
@@ -88,12 +90,13 @@ ONE fenced block, same repo, cold session, in this order:
 - [ ] Every path/name/API traces to a file read, else marked `UNVERIFIED`
 - [ ] Destructive steps have rollback and sign-off
 - [ ] The handoff block does not duplicate the plan body
+- [ ] The prompt is not inside the plan file; the plan file contains no prompt for the user to paste
 - [ ] "Must" vs "should" is explicit
 
 ## Output shape
 
-1. `# Plan` - objective, constraints, steps (files and tools), edge cases, verification, rollback, assumptions and open decisions.
-2. `## Copy-paste prompt` - one fenced block.
+1. `# Plan` - objective, constraints, steps (files and tools), edge cases, verification, rollback, assumptions and open decisions. When the plan is long or the user asks for a file, write it to the project's docs folder.
+2. Copy-paste prompt - one fenced block **in the chat reply**, never appended to the plan file (see step 7).
 
 Respond in the user's language. Keep file paths, class names, tool names and error text verbatim - never paraphrase identifiers.
 
