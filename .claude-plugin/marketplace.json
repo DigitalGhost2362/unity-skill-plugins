@@ -15,12 +15,12 @@
     {
       "name": "unity-ui",
       "source": "./plugins/unity-ui",
-      "description": "uGUI workflow for Unity: panel lifecycle and layout rules, building a panel prefab from a mockup image, and brainstorming UI effects as an HTML preview."
+      "description": "uGUI workflow for Unity: panel lifecycle and layout rules, building a panel prefab from a mockup image, and brainstorming UI animations as an HTML preview."
     },
     {
       "name": "unity-vfx",
       "source": "./plugins/unity-vfx",
-      "description": "Real-time VFX for Unity, mobile-first: a shared core (brief, mesh-first, FSE overdraw budgets, uber material, audit and measurement scripts) plus combat, UI, environment and clothing skills."
+      "description": "Real-time VFX for Unity, mobile-first: a shared core (brief, mesh-first, FSE overdraw budgets, uber material, audit and measurement scripts), a brainstorm skill that previews 4 directions in the browser before building, plus combat, UI, environment and clothing skills."
     }
   ]
 }

@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VFX Options</title>
+<style>
+  :root{--bg:#11131a;--card:#1a1d29;--line:#2b3044;--txt:#e7eaf4;--dim:#8a92ab;
+        --a:#ffcc33;--b:#57d9a3;--c:#7aa8ff;--d:#ff7a90;--ok:#57d9a3;--warn:#ffb340;--bad:#ff5c6c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+         padding:9px 16px;display:flex;flex-wrap:wrap;gap:7px 9px;align-items:center}
+  h1{font-size:14px;margin:0 6px 0 0;font-weight:650} h1 small{color:var(--dim);font-weight:400;margin-left:6px}
+  .sp{flex:1}
+  button,label.c{background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:7px;
+    padding:4px 10px;font:inherit;font-size:12.5px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+  button:hover{border-color:var(--dim)} button.on{border-color:var(--a);color:var(--a)}
+  input[type=range]{width:92px;accent-color:var(--a)}
+  main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:14px 16px 30px}
+  @media (max-width:900px){ main{grid-template-columns:1fr} }
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .hd{display:flex;gap:10px;padding:11px 13px 8px;align-items:flex-start}
+  .key{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-weight:800;color:#141620;flex:none}
+  .card[data-k=A] .key{background:var(--a)} .card[data-k=B] .key{background:var(--b)}
+  .card[data-k=C] .key{background:var(--c)} .card[data-k=D] .key{background:var(--d)}
+  .name{font-weight:650;font-size:14px} .desc{color:var(--dim);font-size:12.5px}
+  .read{font-size:12px;margin-top:3px} .read b{color:var(--dim);font-weight:500}
+  .stage{position:relative;margin:0 13px;border-radius:9px;overflow:hidden;cursor:pointer}
+  .stage canvas{display:block;width:100%}
+  body.grey .stage canvas{filter:grayscale(1)}
+  .tl{display:block;width:calc(100% - 26px);height:20px;margin:5px 13px 0}
+  .stats{padding:6px 13px 0;font:11.5px/1.5 ui-monospace,Consolas,monospace;color:var(--dim)}
+  .stats b{font-weight:600} .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;padding:6px 13px 0}
+  .chip{font-size:11px;border:1px solid var(--line);border-radius:20px;padding:1px 8px;color:var(--warn)}
+  .chip.err{color:var(--bad);border-color:var(--bad)}
+  .ft{display:flex;gap:8px;padding:8px 13px 12px;align-items:center}
+  .unity{flex:1;min-width:0;color:var(--dim);font:11px ui-monospace,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ft button{padding:3px 9px;font-size:12px;flex:none}
+  .crash{position:absolute;inset:0;padding:12px;color:#ff8a95;font:12px ui-monospace,monospace;white-space:pre-wrap;background:rgba(30,0,0,.75)}
+  .help{color:var(--dim);font-size:11.5px;padding:0 16px 18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>VFX Options <small id="subject"></small></h1>
+  <div class="sp"></div>
+  <button id="play" title="space">⏸ pause</button>
+  <label class="c">t <input type="range" id="scrub" min="0" max="1000" value="0"><b id="tv">0.00s</b></label>
+  <label class="c">speed <input type="range" id="speed" min="10" max="150" value="100" step="5"><b id="sv">1.00x</b></label>
+  <button id="bg" title="1 2 3">bg: dark</button>
+  <button id="bloom" title="b">bloom</button>
+  <button id="grey" title="g">grey</button>
+  <button id="copies" title="c">×1</button>
+  <button id="zoom" title="z">gameplay</button>
+  <button id="char">char</button>
+  <button id="shape">shape</button>
+  <button id="heat" title="h">overdraw</button>
+  <button id="sheet">sheet</button>
+</header>
+<main id="grid"></main>
+<div class="help">Click a stage or press A-D to replay one. Space pause, [ ] step a frame while paused, 1/2/3 background.
+Overdraw: blue 1 layer, green 2, yellow 3-4, orange 5-6, red 7-9, white 10+. FSE, alive and active come from one fixed-seed run of ONE instance at gameplay zoom (FSE is an estimate; vfx-measure.cs gives the real number after the build).
+Canvas additive blends in gamma space and reads hotter than Unity linear; judge shape, timing and value here, final brightness in the game view.</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   EDIT ONLY THIS BLOCK: SUBJECT, SETUP, OPTIONS.
+   Each option's `spec` is a vfx-apply spec (see vfx-core/reference/vfx-tools.md).
+   Preview-only keys: uber, path, face (see the vfx-brainstorm skill's translation table).
+   ===================================================================== */
+const SUBJECT = 'Fire skill - AoE impact, radius 2.5 m';
+
+const SETUP = {
+  view: 'iso',            // the gameplay camera: 'side' | 'iso' | 'top'
+  pitch: 40,              // iso camera pitch, degrees
+  frame: 10,              // metres visible across the stage at gameplay zoom
+  closeFrame: 6,          // metres across at close zoom
+  aspect: 16/9,           // the phone screen in its gameplay orientation (9/16 for portrait)
+  origin: [0.5, 0.6],     // where world (0,0,0) sits on the stage, fractions of width/height
+  bloom: true,            // does the TARGET device tier have Bloom? false = preview starts with it off
+  role: 'ability',        // FSE budget: 'frequent' 0.3 | 'ability' 0.5 | 'hero' 1.5
+  bg: { dark:'#1c2029', mid:'#59664f', bright:'#d6ccb0' },  // darkest, typical, brightest ground of the game
+  char: { at:[-1.2, 0.6], height:1.8 },                     // scale reference; null hides it
+  overlay: { circle: 2.5 },  // gameplay shape: {circle:r} {cone:{r,angle,yaw}} {box:{w,l,yaw}}; null = none
+};
+
+const FIRE_RAMP = '#1A0500@0,#C22A00@0.35,#FF8A00@0.7,#FFF2C0@1';
+
+const OPTIONS = [
+{
+  key:'A', name:'Ring Slam', cycle:1.4,
+  desc:'Mesh-first: one hot ring snaps out to the exact radius and erodes, sparks spray. Cheapest, cleanest read.',
+  read:'"hit here, this big" - the ring edge IS the damage edge',
+  beats:{ impact:0.05, end:0.6 },
+  unity:'ring + disc = VFX/Uber mesh materials (Custom1.x erosion); flash glow add; sparks Stretch add',
+  spec:{ emitters:[
+    { name:'Flash', material:'glow/add', pos:[0,0.4,0],
+      main:{ startLifetime:0.14, startSpeed:0, startSize:3.2, startColor:'#FFD9A0*2' },
+      emission:{ rateOverTime:0, bursts:[[0,1]] }, shape:false,
+      sizeOverLifetime:{ size:'0:0.5,0.3:1,1:0.8' },
+      colorOverLifetime:{ color:'#FFFFFF@0,#FF9A40@1|1@0,0@1' } },
+    { name:'Fill', material:'circle/alpha', pos:[0,0.02,0],
+      main:{ startLifetime:0.5, startSpeed:0, startSize:2.5, startColor:'#FF5A1A80' },
+      emission:{ rateOverTime:0, bursts:[[0,1]] }, shape:false,
+      renderer:{ renderMode:'Mesh', mesh:'disc', sortingOrder:0 },
+      sizeOverLifetime:{ size:'0:0.25,0.3:1,1:1' },
+      uber:{ erode:'0:0,0.4:0.05,1:1' } },
+    { name:'Ring', material:'ring/add', pos:[0,0.04,0],
+      main:{ startLifetime:0.5, startSpeed:0, startSize:2.5, startColor:'#FF7A20*1.8' },
+      emission:{ rateOverTime:0, bursts:[[0,1]] }, shape:false,
+      renderer:{ renderMode:'Mesh', mesh:'ring:0.8', sortingOrder:1 },
+      sizeOverLifetime:{ size:'0:0.25,0.3:1,1:1' },
+      uber:{ erode:'0:0,0.5:0.1,1:1', edge:'#FFE0A0*2', edgeWidth:0.12 } },
+    { name:'Sparks', material:'spark/add', pos:[0,0.2,0], rot:[-90,0,0],
+      main:{ startLifetime:[0.2,0.45], startSpeed:[6,11], startSize:[0.15,0.3], startColor:'#FFB060*1.5', gravityModifier:1 },
+      emission:{ rateOverTime:0, bursts:[[0,18]] },
+      shape:{ shapeType:'Hemisphere', radius:0.3 },
+      renderer:{ renderMode:'Stretch', velocityScale:0.06, lengthScale:1, sortingOrder:2 },
+      sizeOverLifetime:{ size:'0:1,1:0' } },
+  ]},
+},
+{
+  key:'B', name:'Flame Bloom', cycle:1.9,
+  desc:'Soft fireballs billow up across the whole area, dark smoke rolls after, embers drift. Round, warm, weighty.',
+  read:'"the ground caught fire" - volume over edge',
+  beats:{ antic:[0,0.1], impact:0.15, end:1.2 },
+  unity:'fireballs = smoke texture on VFX/Uber with _RampOn (fire ramp) + erosion; smoke alpha; embers add + noise',
+  spec:{ emitters:[
+    { name:'Fireballs', material:'smoke/add', pos:[0,0,0], rot:[-90,0,0],
+      main:{ startLifetime:[0.55,0.85], startSpeed:[1,2.5], startSize:[1.1,1.8], startRotation:[0,360], startColor:'#FFE6D0' },
+      emission:{ rateOverTime:0, bursts:[[0,9],[0.08,6]] },
+      shape:{ shapeType:'Cone', radius:2.1, angle:8 },
+      sizeOverLifetime:{ size:'0:0.3,0.3:1,1:1.25' },
+      rotationOverLifetime:{ z:[-40,40] },
+      uber:{ ramp:FIRE_RAMP, erode:'0:0,0.45:0.1,1:1' } },
+    { name:'Smoke', material:'smoke/alpha', pos:[0,0.6,0], rot:[-90,0,0],
+      main:{ startDelay:0.15, startLifetime:[0.8,1.1], startSpeed:[0.6,1.2], startSize:[1.6,2.4], startRotation:[0,360], startColor:'#2A1A14' },
+      emission:{ rateOverTime:0, bursts:[[0,6]] },
+      shape:{ shapeType:'Cone', radius:1.6, angle:10 },
+      sizeOverLifetime:{ size:'0:0.6,1:1.3' },
+      colorOverLifetime:{ color:'#FFFFFF@0,#FFFFFF@1|0@0,0.55@0.25,0@1' },
+      renderer:{ sortingOrder:-1 } },
+    { name:'Embers', material:'dot/add', pos:[0,0.2,0], rot:[-90,0,0],
+      main:{ startLifetime:[0.6,1.1], startSpeed:[2,4.5], startSize:[0.06,0.12], startColor:'#FFB040*2' },
+      emission:{ rateOverTime:0, bursts:[[0.05,26]] },
+      shape:{ shapeType:'Cone', radius:2, angle:20 },
+      noise:{ strength:1.2, frequency:0.8 },
+      sizeOverLifetime:{ size:'0:1,1:0' },
+      renderer:{ sortingOrder:2 } },
+  ]},
+},
+{
+  key:'C', name:'Pillar Burst', cycle:1.6,
+  desc:'Sharp flame pillars erupt inside a cracked edge ring, rock shards fly. Angular, aggressive, reads as danger.',
+  read:'"the ground erupts" - spikes say damage, the thin ring says where',
+  beats:{ antic:[0,0.08], impact:0.1, end:0.8 },
+  unity:'pillars = cone mesh particles (startSize3D) on VFX/Uber + erosion; edge ring mesh; shards alpha + gravity',
+  spec:{ emitters:[
+    { name:'Edge', material:'ring/add', pos:[0,0.03,0],
+      main:{ startLifetime:0.7, startSpeed:0, startSize:2.5, startColor:'#FF3A10*1.5' },
+      emission:{ rateOverTime:0, bursts:[[0,1]] }, shape:false,
+      renderer:{ renderMode:'Mesh', mesh:'ring:0.93' },
+      uber:{ erode:'0:0,0.6:0.05,1:1', edge:'#FFC080*1.5', edgeWidth:0.1 } },
+    { name:'Pillars', material:'glow/add', pos:[0,0,0], rot:[-90,0,0],
+      main:{ startDelay:0.08, startLifetime:[0.4,0.6], startSpeed:0, startSize3D:true,
+             startSizeX:[0.25,0.4], startSizeY:[1.6,2.6], startSizeZ:0.3, startColor:'#FF6A1A*1.6' },
+      emission:{ rateOverTime:0, bursts:[[0,8]] },
+      shape:{ shapeType:'Circle', radius:1.9, radiusThickness:0.6 },
+      renderer:{ renderMode:'Mesh', mesh:'cone:0.1', sortingOrder:1 },
+      sizeOverLifetime:{ size:'0:0,0.15:1,1:0.7' },
+      uber:{ erode:'0:0,0.5:0.1,1:1', edge:'#FFE0A0*2', edgeWidth:0.1 } },
+    { name:'Shards', material:'shard/alpha', pos:[0,0.2,0], rot:[-90,0,0],
+      main:{ startDelay:0.08, startLifetime:[0.6,0.9], startSpeed:[4,7], startSize:[0.15,0.32], startRotation:[0,360], startColor:'#3A1C10', gravityModifier:2.5 },
+      emission:{ rateOverTime:0, bursts:[[0,14]] },
+      shape:{ shapeType:'Hemisphere', radius:1.5 },
+      rotationOverLifetime:{ z:[-540,540] },
+      renderer:{ sortingOrder:2 } },
+    { name:'Flash', material:'glow/add', pos:[0,0.5,0],
+      main:{ startDelay:0.08, startLifetime:0.12, startSpeed:0, startSize:2.4, startColor:'#FFC890*1.6' },
+      emission:{ rateOverTime:0, bursts:[[0,1]] }, shape:false,
+      colorOverLifetime:{ color:'#FFFFFF@0,#FFFFFF@1|1@0,0@1' } },
+  ]},
+},
+{
+  key:'D', name:'Meteor Drop', cycle:2.0,
+  desc:'A meteor streaks in from the sky, slams, and a shockwave rolls out to the radius. Loudest; hero tier only.',
+  read:'"something huge landed" - the fall is the telegraph',
+  beats:{ antic:[0,0.35], impact:0.35, end:1.1 },
+  flags:['hero tier','flight time comes from gameplay'],
+  unity:'meteor = glow + Trails module on the gameplay projectile (path); impact = flash, ring mesh, sparks, smoke',
+  spec:{ emitters:[
+    { name:'Meteor', material:'glow/add', trailMaterial:'trail/add', pos:[-3.5,7,1.5],
+      path:{ to:[0,0.3,0], time:0.35, ease:'in', clear:true },
+      main:{ startLifetime:1, startSpeed:0, startSize:1.3, startColor:'#FFE0A0*2.5', simulationSpace:'Local' },
+      emission:{ rateOverTime:0, bursts:[[0,1]] }, shape:false },
+    { name:'Tail', material:'smoke/add', pos:[-3.5,7,1.5],
+      path:{ to:[0,0.3,0], time:0.35, ease:'in', clear:true },
+      main:{ startLifetime:[0.2,0.35], startSpeed:0, startSize:[0.5,0.9], startColor:'#FF7A20*1.4', simulationSpace:'World' },
+      emission:{ rateOverTime:90 }, shape:{ shapeType:'Sphere', radius:0.2 },
+      sizeOverLifetime:{ size:'0:1,1:0.2' } },
+    { name:'Impact', material:'glow/add', pos:[0,0.6,0],
+      main:{ startDelay:0.35, startLifetime:0.18, startSpeed:0, startSize:5, startColor:'#FFE6C0*2.2' },
+      emission:{ rateOverTime:0, bursts:[[0,1]] }, shape:false,
+      colorOverLifetime:{ color:'#FFFFFF@0,#FF8A30@1|1@0,0@1' } },
+    { name:'Shockwave', material:'ring/add', pos:[0,0.05,0],
+      main:{ startDelay:0.35, startLifetime:0.6, startSpeed:0, startSize:2.5, startColor:'#FF8A30*2' },
+      emission:{ rateOverTime:0, bursts:[[0,1]] }, shape:false,
+      renderer:{ renderMode:'Mesh', mesh:'ring:0.6' },
+      sizeOverLifetime:{ size:'0:0.1,0.4:1,1:1.05' },
+      uber:{ erode:'0:0,0.4:0.1,1:1', edge:'#FFF0C0*2', edgeWidth:0.15 } },
+    { name:'Debris', material:'spark/add', pos:[0,0.3,0], rot:[-90,0,0],
+      main:{ startDelay:0.35, startLifetime:[0.4,0.8], startSpeed:[8,14], startSize:[0.2,0.4], startColor:'#FFC070*1.8', gravityModifier:2 },
+      emission:{ rateOverTime:0, bursts:[[0,30]] }, shape:{ shapeType:'Hemisphere', radius:0.4 },
+      renderer:{ renderMode:'Stretch', velocityScale:0.05, lengthScale:1 },
+      sizeOverLifetime:{ size:'0:1,1:0' } },
+    { name:'Dust', material:'smoke/alpha', pos:[0,0.3,0], rot:[-90,0,0],
+      main:{ startDelay:0.4, startLifetime:[0.7,1], startSpeed:[2,4], startSize:[1.4,2.2], startRotation:[0,360], startColor:'#3B2A22' },
+      emission:{ rateOverTime:0, bursts:[[0,10]] }, shape:{ shapeType:'Cone', radius:0.6, angle:70 },
+      limitVelocityOverLifetime:{ drag:3 },
+      sizeOverLifetime:{ size:'0:0.4,1:1.2' },
+      colorOverLifetime:{ color:'#FFFFFF@0,#FFFFFF@1|0@0,0.6@0.2,0@1' },
+      renderer:{ sortingOrder:-1 } },
+  ]},
+},
+];
+
+/* =====================================================================
+   HARNESS - do not edit below. It simulates the vfx-apply spec subset
+   listed in the skill; anything it cannot show is flagged on the card.
+   ===================================================================== */
+const DPR = Math.min(2, window.devicePixelRatio || 1), STEP = 1/60, E = 16;
+const BUDGET = { frequent:0.3, ability:0.5, hero:1.5 };
+const URLQ = new URLSearchParams(location.search);   // ?sheet&heat&grey&nobloom&close&bg=bright&copies=5
+const UI = { speed:1, paused:false, bg:URLQ.get('bg')||'dark', bloom:SETUP.bloom!==false&&!URLQ.has('nobloom'), grey:URLQ.has('grey'),
+             copies:+URLQ.get('copies')||1, zoom:URLQ.has('close')?'close':'game', char:!!SETUP.char, shape:!!SETUP.overlay,
+             heat:URLQ.has('heat'), sheet:URLQ.has('sheet') };
+const D2R = Math.PI/180;
+const clamp = (v,a=0,b=1) => v<a?a:v>b?b:v, lerp = (a,b,t) => a+(b-a)*t;
+const sstep = (a,b,x) => { const t = clamp((x-a)/(b-a)); return t*t*(3-2*t); };
+function rng(seed){ let a = seed>>>0; return () => { a = a+0x6D2B79F5|0; let t = Math.imul(a^a>>>15, 1|a);
+  t = t+Math.imul(t^t>>>7, 61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function hash3(i,j,k){ const s = Math.sin(i*127.1+j*311.7+k*74.7)*43758.5453; return s-Math.floor(s); }
+function vnoise(x,y,z){ const xi=Math.floor(x),yi=Math.floor(y),zi=Math.floor(z),xf=x-xi,yf=y-yi,zf=z-zi;
+  const u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf),w=zf*zf*(3-2*zf),h=(a,b,c)=>hash3(xi+a,yi+b,zi+c);
+  return lerp(lerp(lerp(h(0,0,0),h(1,0,0),u),lerp(h(0,1,0),h(1,1,0),u),v),
+              lerp(lerp(h(0,0,1),h(1,0,1),u),lerp(h(0,1,1),h(1,1,1),u),v),w)*2-1; }
+function fbm2(x,y){ let s=0,a=.5,f=1; for(let o=0;o<4;o++){ s+=a*(vnoise(x*f,y*f,o*7.1)*.5+.5); a*=.5; f*=2; } return s/.9375; }
+function rotM(e){ if(!e) return null; const [x,y,z]=e.map(v=>v*D2R),cx=Math.cos(x),sx=Math.sin(x),cy=Math.cos(y),sy=Math.sin(y),cz=Math.cos(z),sz=Math.sin(z);
+  return [cy*cz+sy*sx*sz, -cy*sz+sy*sx*cz, sy*cx,  cx*sz, cx*cz, -sx,  -sy*cz+cy*sx*sz, sy*sz+cy*sx*cz, cy*cx]; } // Unity Z, X, Y
+const mul = (M,v) => M ? [M[0]*v[0]+M[1]*v[1]+M[2]*v[2], M[3]*v[0]+M[4]*v[1]+M[5]*v[2], M[6]*v[0]+M[7]*v[1]+M[8]*v[2]] : v;
+
+/* ---------- curves, colors, gradients (vfx-apply encodings) ---------- */
+function keys(s){ const k = String(s).split(',').map(p=>p.split(':').map(Number)).map(a=>({t:a[0],v:a[1],i:a[2],o:a[3]}));
+  k.forEach((q,i)=>{ if(q.i===undefined||isNaN(q.i)){ let m=0; if(i>0&&i<k.length-1){ const p=k[i-1],n=k[i+1];
+    m = (q.v<=Math.min(p.v,n.v)||q.v>=Math.max(p.v,n.v)) ? 0 : (n.v-p.v)/(n.t-p.t); } q.i=m; q.o=m; } else if(isNaN(q.o)) q.o=q.i; });
+  return k; }
+function evk(k,t){ if(t<=k[0].t) return k[0].v; const L=k[k.length-1]; if(t>=L.t) return L.v;
+  let i=0; while(k[i+1].t<t) i++; const a=k[i],b=k[i+1],dt=b.t-a.t,u=(t-a.t)/dt,u2=u*u,u3=u2*u;
+  return (2*u3-3*u2+1)*a.v+(u3-2*u2+u)*a.o*dt+(-2*u3+3*u2)*b.v+(u3-u2)*b.i*dt; }
+function mm(s,def){ if(s===undefined) s=def; if(s===undefined||s===null) return null;
+  if(typeof s==='number') return ()=>s;
+  if(Array.isArray(s)) return (t,r)=>s[0]+(s[1]-s[0])*r;
+  if(typeof s==='string'){ const k=keys(s); return t=>evk(k,t); }
+  if(s.c){ const k=keys(s.c),m=s.m??1; return t=>evk(k,t)*m; }
+  if(s.min){ const a=keys(s.min),b=keys(s.max),m=s.m??1; return (t,r)=>lerp(evk(a,t),evk(b,t),r)*m; }
+  return ()=>0; }
+function mmMax(s){ if(typeof s==='number') return s; if(Array.isArray(s)) return Math.max(...s);
+  if(typeof s==='string') return Math.max(...keys(s).map(k=>k.v)); if(s&&s.c) return Math.max(...keys(s.c).map(k=>k.v))*(s.m??1); return 1; }
+function col(s){ s=String(s).trim(); let k=1; const st=s.indexOf('*'); if(st>0){ k=parseFloat(s.slice(st+1)); s=s.slice(0,st); }
+  const h=s.replace('#',''), n=i=>parseInt(h.slice(i,i+2),16)/255; return [n(0)*k,n(2)*k,n(4)*k,h.length>=8?n(6):1]; }
+function grad(s){ s=String(s); let fixed=false; if(s.endsWith('~fixed')){ fixed=true; s=s.slice(0,-6); }
+  const [cs,as]=s.split('|');
+  const ck=cs.split(',').map(x=>{ const [c,t]=x.split('@'); return {t:+t, v:col(c)}; }).sort((a,b)=>a.t-b.t);
+  const ak=(as?as.split(',').map(x=>{ const [a,t]=x.split('@'); return {t:+t, v:+a}; }):[{t:0,v:1}]).sort((a,b)=>a.t-b.t);
+  const smp=(K,t,f)=>{ if(t<=K[0].t) return K[0].v; for(let i=0;i<K.length-1;i++){ const a=K[i],b=K[i+1];
+    if(t<=b.t) return fixed ? b.v : f(a.v,b.v,(t-a.t)/((b.t-a.t)||1)); } return K[K.length-1].v; };
+  return t=>{ const c=smp(ck,t,(a,b,u)=>a.map((x,i)=>lerp(x,b[i],u))), a=smp(ak,t,(a,b,u)=>lerp(a,b,u)); return [c[0],c[1],c[2],c[3]*a]; }; }
+function colSampler(s){ if(s===undefined) return ()=>[1,1,1,1];
+  if(Array.isArray(s)){ if(s.every(x=>!String(x).includes('@'))){ const a=col(s[0]),b=col(s[1]); return r=>a.map((x,i)=>lerp(x,b[i],r)); }
+    const g0=grad(s[0]),g1=grad(s[1]); return (r,nt)=>{ const a=g0(nt),b=g1(nt); return a.map((x,i)=>lerp(x,b[i],r)); }; }
+  if(typeof s==='object'&&s.rand){ const g=grad(s.rand); return r=>g(r); }
+  if(String(s).includes('@')){ const g=grad(s); return (r,nt)=>g(nt); }
+  const c=col(s); return ()=>c; }
+
+/* ---------- sprites: procedural white shapes, erosion variants, tint cache ---------- */
+const NOISE = {};
+function noiseMap(n){ if(NOISE[n]) return NOISE[n]; const a=new Float32Array(n*n); let lo=9,hi=-9;
+  for(let j=0;j<n;j++) for(let i=0;i<n;i++){ const v=fbm2(i/n*5,j/n*5); a[j*n+i]=v; lo=Math.min(lo,v); hi=Math.max(hi,v); }
+  for(let p=0;p<a.length;p++) a[p]=(a[p]-lo)/(hi-lo); return NOISE[n]=a; }
+const SHAPES = {
+  glow:  (u,v)=>{ const d=Math.hypot(u,v); return d>=1?0:(1-d)**2.2; },
+  circle:(u,v)=>sstep(1,.8,Math.hypot(u,v)),
+  dot:   (u,v)=>sstep(1,.9,Math.hypot(u,v)),
+  ring:  (u,v)=>1-sstep(0,.14,Math.abs(Math.hypot(u,v)-.78)),
+  spark: (u,v)=>Math.max(0,1-Math.abs(u))**1.3*Math.exp(-((v/.16)**2)),
+  star:  (u,v)=>{ const d=Math.hypot(u,v),s=(a,b)=>Math.max(0,1-Math.abs(a))**2*Math.exp(-((b/.07)**2)); return clamp(Math.max(s(u,v),s(v,u),d<1?(1-d)**3*.8:0)); },
+  flare: (u,v)=>{ const d=Math.hypot(u,v); return clamp(Math.max(0,1-Math.abs(u))**1.5*Math.exp(-((v/.05)**2))+(d<1?(1-d)**3:0)); },
+  smoke: (u,v)=>{ const d=Math.hypot(u,v); return d>=1?0:clamp((1-d)**1.3*(.3+.95*fbm2(u*2.2+9,v*2.2+3))); },
+  shard: (u,v)=>(v<.75&&Math.abs(u)<(v+.95)*.4)?1:0,
+  petal: (u,v)=>sstep(1,.75,Math.hypot(u/.5,v/.95)),
+  trail: (u,v)=>Math.exp(-((v/.45)**2)),
+};
+function meshShape(tok){ const [k,a,b]=tok.split(':');
+  if(k==='ring'){ const inn=+(a??0.6); return { flat:1, cov:Math.PI*(1-inn*inn)/4,
+    f:(u,v)=>{ const d=Math.hypot(u,v); return d>1||d<inn?0:Math.sin(Math.PI*(d-inn)/(1-inn))**.6; } }; }
+  if(k==='arc'){ const arc=+(a??180), inn=+(b??0.55); return { flat:1, cov:Math.PI*(1-inn*inn)/4*arc/360,
+    f:(u,v)=>{ const d=Math.hypot(u,v); if(d>1||d<inn) return 0; const s=Math.atan2(u,-v)/D2R/arc+.5;
+      return s<0||s>1?0:Math.sin(Math.PI*s)*Math.sin(Math.PI*(d-inn)/(1-inn))**.6; } }; }
+  if(k==='disc') return { flat:1, cov:Math.PI/4, f:(u,v)=>sstep(1,.94,Math.hypot(u,v)) };
+  if(k==='quad') return { flat:1, cov:1, f:(u,v)=>Math.max(Math.abs(u),Math.abs(v))<.97?1:0 };
+  if(k==='cone'){ const top=+(a??0.35); return { vert:'cone', top, cov:(1+top)/2,
+    f:(u,v)=>{ const h=(1-v)/2, hw=lerp(1,top,h); if(Math.abs(u)>hw) return 0; const e=Math.abs(u)/hw;
+      return (.3+.7*e**3)*Math.sin(Math.PI*clamp(h*1.05))**.6; } }; }
+  if(k==='dome') return { vert:'dome', cov:Math.PI/8, f:(u,v)=>{ const d=Math.hypot(u,v); return d>1||v>.02?0:.2+.8*d**5; } };
+  return null; }
+const CACHE = new Map();
+function cached(key,make){ let v=CACHE.get(key); if(v) return v; v=make(); CACHE.set(key,v);
+  if(CACHE.size>1600) CACHE.delete(CACHE.keys().next().value); return v; }
+function cvs(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
+function base(tex){ return cached('A|'+tex, ()=>{ const m=tex.startsWith('mesh:')?meshShape(tex.slice(5)):SHAPES[tex]?{f:SHAPES[tex],cov:1}:null;
+  if(!m) throw new Error('unknown texture or mesh "'+tex+'"');
+  const n=m.flat||m.vert?128:64, a=new Float32Array(n*n);
+  for(let j=0;j<n;j++) for(let i=0;i<n;i++) a[j*n+i]=clamp(m.f((i+.5)/n*2-1,(j+.5)/n*2-1));
+  return Object.assign({n,a},m); }); }
+function variant(tex,ramp,rk,ek,kind,ew){ return cached(`V|${tex}|${rk}|${ek}|${kind}|${ew}`, ()=>{
+  const B=base(tex), n=B.n, N=noiseMap(n), c=cvs(n,n), x=c.getContext('2d'), im=x.createImageData(n,n), e=ek/E;
+  for(let p=0;p<n*n;p++){ let a=B.a[p], r=1,g=1,b=1;
+    if(kind==='solid') a=B.flat||B.vert?(a>.01?1:0):1;
+    else if(ek>0){ const val=a*(.3+.7*N[p]);
+      a = kind==='edge' ? (a>.01&&val>=e&&val<e+ew ? 1-(val-e)/ew : 0) : a*sstep(e,e+.05,val); }
+    else if(kind==='edge') a=0;
+    if(ramp&&kind==='body'){ const q=ramp(B.a[p]); r=clamp(q[0]); g=clamp(q[1]); b=clamp(q[2]); }
+    const k=p*4; im.data[k]=r*255; im.data[k+1]=g*255; im.data[k+2]=b*255; im.data[k+3]=a*255; }
+  x.putImageData(im,0,0); return c; }); }
+const Q=20;
+function tint(img,key,r,g,b){ const q=v=>Math.round(clamp(v)*Q); return cached(`T|${key}|${q(r)},${q(g)},${q(b)}`, ()=>{
+  const c=cvs(img.width,img.height), x=c.getContext('2d'); x.drawImage(img,0,0);
+  x.globalCompositeOperation='multiply'; x.fillStyle=`rgb(${q(r)*255/Q},${q(g)*255/Q},${q(b)*255/Q})`; x.fillRect(0,0,c.width,c.height);
+  x.globalCompositeOperation='destination-in'; x.drawImage(img,0,0); return c; }); }
+
+/* ---------- spec validation ---------- */
+const MODULES = ['main','emission','shape','velocityOverLifetime','limitVelocityOverLifetime','inheritVelocity','forceOverLifetime',
+  'colorOverLifetime','colorBySpeed','sizeOverLifetime','sizeBySpeed','rotationOverLifetime','rotationBySpeed','externalForces',
+  'noise','collision','trigger','subEmitters','textureSheetAnimation','lights','trails','customData'];
+const PREVIEWED = new Set(['main','emission','shape','velocityOverLifetime','limitVelocityOverLifetime','forceOverLifetime',
+  'colorOverLifetime','sizeOverLifetime','rotationOverLifetime','noise','subEmitters','trails']);
+const EM_KEYS = new Set(['name','parent','pos','rot','scale','material','trailMaterial','remove','renderer','uber','path',...MODULES]);
+function validate(opt){ const out=[]; const ems=(opt.spec&&opt.spec.emitters)||[];
+  if(!ems.length) out.push({err:1,t:'spec has no emitters'});
+  for(const e of ems){ for(const k of Object.keys(e)){
+      if(!EM_KEYS.has(k)) out.push({err:1,t:`${e.name}: unknown key "${k}"`});
+      else if(MODULES.includes(k)&&!PREVIEWED.has(k)&&e[k]!==false) out.push({t:`${e.name}: ${k} not previewed`}); }
+    const r=e.renderer||{};
+    if(r.renderMode&&!['Billboard','Stretch','HorizontalBillboard','Mesh'].includes(r.renderMode)) out.push({t:`${e.name}: renderMode ${r.renderMode} not previewed`});
+    if(r.renderMode==='Mesh'&&!r.mesh) out.push({err:1,t:`${e.name}: Mesh needs renderer.mesh token`});
+    if(r.renderMode==='Mesh'&&r.mesh&&meshShape(r.mesh)?.flat&&e.main&&e.main.startRotation) out.push({t:`${e.name}: flat mesh spins via startRotation3D + startRotationY`});
+    if(e.uber&&e.uber.distort) out.push({t:`${e.name}: distortion not previewed`});
+    if(e.noise) out.push({t:`${e.name}: noise approximate`});
+    if(e.parent) out.push({t:`${e.name}: parent ignored, pos is root-relative`});
+    for(const s of (e.subEmitters&&e.subEmitters.list)||[]) if((s.type||'Death')!=='Death') out.push({t:`${e.name}: ${s.type} sub-emitter not previewed`}); }
+  if(opt.draw) out.push({t:'custom draw layer: not in spec, hand-built'});
+  for(const f of opt.flags||[]) out.push({t:f});
+  return out; }
+
+/* ---------- simulation ---------- */
+function sampleShape(sh,R){
+  if(!sh) return [0,0,0,0,0,1];
+  const type=sh.shapeType||'Cone', r=sh.radius??1, th=sh.radiusThickness??1, arc=(sh.arc??360)*D2R;
+  let p,d;
+  if(type==='Sphere'||type==='Hemisphere'){ const z=R()*2-1, ph=R()*Math.PI*2, s=Math.sqrt(1-z*z);
+    d=[s*Math.cos(ph),s*Math.sin(ph),type==='Hemisphere'?Math.abs(z):z]; const rad=r*(1-th+th*Math.cbrt(R())); p=d.map(v=>v*rad); }
+  else if(type==='Cone'){ const ph=R()*arc, rho=r*(1-th+th*Math.sqrt(R())), a=(sh.angle??25)*D2R*(r>0?rho/r:Math.sqrt(R()));
+    p=[Math.cos(ph)*rho,Math.sin(ph)*rho,0]; d=[Math.cos(ph)*Math.sin(a),Math.sin(ph)*Math.sin(a),Math.cos(a)]; }
+  else if(type==='Circle'){ const ph=R()*arc, rho=r*(1-th+th*Math.sqrt(R())); d=[Math.cos(ph),Math.sin(ph),0]; p=d.map(v=>v*rho); }
+  else if(type==='Donut'){ const ph=R()*arc, t=(sh.donutRadius??.2)*Math.sqrt(R()), q=R()*Math.PI*2;
+    d=[Math.cos(ph),Math.sin(ph),0]; p=[Math.cos(ph)*(r+t*Math.cos(q)),Math.sin(ph)*(r+t*Math.cos(q)),t*Math.sin(q)]; }
+  else if(type==='Edge'||type==='SingleSidedEdge'){ p=[(R()*2-1)*r,0,0]; d=[0,1,0]; }
+  else if(type==='Box'||type==='Rectangle'){ const s=sh.scale||[1,1,1]; p=[(R()-.5)*s[0],(R()-.5)*s[1],type==='Box'?(R()-.5)*s[2]:0]; d=[0,0,1]; }
+  else { p=[0,0,0]; d=[0,0,1]; }
+  if(sh.randomDirectionAmount){ const z=R()*2-1,ph=R()*Math.PI*2,s=Math.sqrt(1-z*z),q=[s*Math.cos(ph),s*Math.sin(ph),z],k=sh.randomDirectionAmount;
+    d=d.map((v,i)=>lerp(v,q[i],k)); const l=Math.hypot(...d)||1; d=d.map(v=>v/l); }
+  if(sh.sphericalDirectionAmount){ const l=Math.hypot(...p)||1,k=sh.sphericalDirectionAmount; d=d.map((v,i)=>lerp(v,p[i]/l,k)); const m=Math.hypot(...d)||1; d=d.map(v=>v/m); }
+  if(sh.rotation){ const M=rotM(sh.rotation); p=mul(M,p); d=mul(M,d); }
+  if(sh.position) p=p.map((v,i)=>v+sh.position[i]);
+  return [...p,...d]; }
+
+class Em {
+  constructor(s,i,fx,defs){
+    const merge=k=>(s[k]===false?false:(defs[k]||s[k])?Object.assign({},defs[k],s[k]):undefined);
+    const m=merge('main')||{};
+    this.s=s; this.i=i; this.fx=fx; this.name=s.name||('E'+i); this.ps=[]; this.inst=[];
+    this.dur=m.duration??1; this.loop=!!m.loop; this.delay=m.startDelay??0; this.max=Math.min(m.maxParticles??1000,1500);
+    this.life=mm(m.startLifetime,1); this.speed=mm(m.startSpeed,2); this.lifeMax=mmMax(m.startLifetime??1);
+    this.size3=m.startSize3D?[mm(m.startSizeX,1),mm(m.startSizeY,1),mm(m.startSizeZ,1)]:null; this.size=mm(m.startSize,.5);
+    this.rot=mm(m.startRotation,0); this.rotY=m.startRotation3D?mm(m.startRotationY,0):null;
+    this.color=colSampler(m.startColor); this.grav=mm(m.gravityModifier,0); this.local=(m.simulationSpace||'Local')==='Local';
+    const em=merge('emission')||{}; this.rate=mm(em.rateOverTime,10);
+    this.bursts=(em.bursts||[]).map(b=>({t:b[0],n:b[1],cyc:b[2]??1,int:b[3]??.01,p:b[4]??1}));
+    const sh=merge('shape'); this.sh=sh===false?null:(sh||{shapeType:'Sphere',radius:.1});
+    this.M=rotM(s.rot); this.pos=s.pos||[0,0,0];
+    const v=merge('velocityOverLifetime'); this.vol=v&&{x:mm(v.x,0),y:mm(v.y,0),z:mm(v.z,0),orb:mm(v.orbitalY,0),rad:mm(v.radial,0)};
+    const lv=merge('limitVelocityOverLifetime'); this.lv=lv&&{lim:mm(lv.limit),damp:lv.dampen??1,drag:mm(lv.drag,0)};
+    const f=merge('forceOverLifetime'); this.force=f&&{x:mm(f.x,0),y:mm(f.y,0),z:mm(f.z,0)};
+    const nz=merge('noise'); this.noise=nz&&{str:mm(nz.strength,1),freq:nz.frequency??.5,scroll:nz.scrollSpeed??0};
+    const so=merge('sizeOverLifetime'); this.sol=so&&(so.separateAxes?{sep:[mm(so.x,1),mm(so.y,1),mm(so.z,1)]}:{one:mm(so.size,1)});
+    const co=merge('colorOverLifetime'); this.col=co&&co.color?grad(co.color):null;
+    const ro=merge('rotationOverLifetime'); this.rol=ro&&{z:mm(ro.z??ro.angularVelocity,0),y:mm(ro.y,0)};
+    const tr=merge('trails'); this.tr=tr&&{life:tr.lifetime??1,w:mm(tr.widthOverTrail,1),c:tr.colorOverTrail?grad(tr.colorOverTrail):null,min:tr.minVertexDistance??.05};
+    const r=merge('renderer')||{}; this.mode=r.renderMode||'Billboard'; this.order=r.sortingOrder??0;
+    this.vScale=r.velocityScale??0; this.lScale=r.lengthScale??2; this.mesh=r.mesh||null; this.face=s.face||'ground';
+    const mat=String(s.material||'glow/add').split('/'); this.tex=this.mode==='Mesh'&&this.mesh?'mesh:'+this.mesh:mat[0]; this.blend=mat[1]||'add';
+    base(this.tex);
+    const tm=String(s.trailMaterial||'trail/add').split('/'); this.tblend=tm[1]||'add';
+    const u=s.uber||{}; this.ub={ erode:mm(u.erode), base:u.erosion||0, edge:u.edge?col(u.edge):null, ew:u.edgeWidth??.1,
+      ramp:u.ramp?grad(u.ramp):null, rk:u.ramp||'', inten:mm(u.intensity) };
+    this.path=s.path||null; this.subs=[]; this.isSub=false;
+    const sub=merge('subEmitters'); this.subList=sub&&sub.list||[];
+  }
+  start(){ if(!this.isSub) this.inst.push({t0:this.delay,last:-1e-9,acc:0,root:true}); }
+  origin(inst){ const o=this.fx.offset; let p=this.pos;
+    if(this.path&&inst.root){ let u=clamp((this.fx.t-inst.t0)/this.path.time);
+      u=this.path.ease==='in'?u*u:this.path.ease==='out'?1-(1-u)*(1-u):u; p=p.map((v,i)=>lerp(v,this.path.to[i],u)); }
+    return inst.at||[p[0]+o[0],p[1]+o[1],p[2]+o[2]]; }
+  spawnAt(at,c){ this.inst.push({t0:this.fx.t+this.delay,last:-1e-9,acc:0,at,inherit:c}); }
+  emit(inst,n,nt){ const R=this.fx.R, O=this.origin(inst);
+    for(let k=0;k<n&&this.ps.length<this.max;k++){
+      const q=sampleShape(this.sh,R), P=mul(this.M,[q[0],q[1],q[2]]), Dv=mul(this.M,[q[3],q[4],q[5]]);
+      const sp=this.speed(nt,R()), loc=this.local&&inst.root;
+      const p={ age:0, life:Math.max(.01,this.life(nt,R())), inst, loc, r:R(), seed:R()*50,
+        x:P[0]+(loc?0:O[0]), y:P[1]+(loc?0:O[1]), z:P[2]+(loc?0:O[2]), vx:Dv[0]*sp, vy:Dv[1]*sp, vz:Dv[2]*sp,
+        g:this.grav(nt,R()), rz:this.rot(nt,R()), ry:this.rotY?this.rotY(nt,R()):0, rzs:R(), rys:R(), trail:this.tr?[]:null };
+      if(this.size3){ const r=R(); p.sz=this.size3.map(f=>f(nt,r)); } else { const s=this.size(nt,R()); p.sz=[s,s,s]; }
+      p.c=this.color(R(),nt).slice(); if(inst.inherit) for(let i=0;i<4;i++) p.c[i]*=inst.inherit[i];
+      this.ps.push(p); } }
+  world(p){ if(!p.loc) return [p.x,p.y,p.z]; const O=this.origin(p.inst); return [p.x+O[0],p.y+O[1],p.z+O[2]]; }
+  step(dt){ const T=this.fx.t;
+    for(const inst of this.inst){ if(inst.done) continue; const lt=T-inst.t0; if(lt<0) continue;
+      if(this.path&&inst.root&&this.path.clear&&lt>=this.path.time){ inst.done=true; this.ps=this.ps.filter(p=>!(p.loc&&p.inst===inst)); continue; }
+      if(!this.loop&&lt>this.dur+STEP){ inst.done=true; continue; }
+      const nt=(lt%this.dur)/this.dur;
+      inst.acc+=Math.max(0,this.rate(nt,this.fx.R()))*dt; const n=Math.floor(inst.acc); inst.acc-=n; if(n) this.emit(inst,n,nt);
+      const prev=inst.last; inst.last=lt;
+      for(const b of this.bursts) for(let c=0;c<b.cyc;c++){ const bt=b.t+c*b.int;
+        for(let k=Math.max(0,Math.floor(prev/this.dur));k<=Math.floor(lt/this.dur);k++){ if(k>0&&!this.loop) break;
+          const at=k*this.dur+bt; if(at>prev&&at<=lt&&this.fx.R()<=b.p){ const cnt=Array.isArray(b.n)?Math.round(lerp(b.n[0],b.n[1],this.fx.R())):b.n; this.emit(inst,cnt,nt); } } } }
+    if(this.isSub) this.inst=this.inst.filter(i=>!i.done);
+    const out=[];
+    for(const p of this.ps){ p.age+=dt; if(p.age>=p.life){ for(const s of this.subs) if(s.type==='Death') s.em.spawnAt(this.world(p),s.inh?p.c:null); continue; }
+      const u=p.age/p.life;
+      p.vy-=9.81*p.g*dt;
+      if(this.force){ p.vx+=this.force.x(u,p.r)*dt; p.vy+=this.force.y(u,p.r)*dt; p.vz+=this.force.z(u,p.r)*dt; }
+      if(this.lv){ const d=this.lv.drag(u,p.r); if(d){ const k=Math.max(0,1-d*dt); p.vx*=k; p.vy*=k; p.vz*=k; }
+        if(this.lv.lim){ const lim=this.lv.lim(u,p.r), s=Math.hypot(p.vx,p.vy,p.vz); if(s>lim){ const ns=lerp(s,lim,clamp(this.lv.damp*dt*30)),k=ns/s; p.vx*=k; p.vy*=k; p.vz*=k; } } }
+      let ax=0,ay=0,az=0;
+      if(this.vol){ ax=this.vol.x(u,p.r); ay=this.vol.y(u,p.r); az=this.vol.z(u,p.r);
+        const O=p.loc?[0,0,0]:this.origin(p.inst), dx=p.x-O[0], dz=p.z-O[2];
+        const rad=this.vol.rad(u,p.r); if(rad){ const l=Math.hypot(dx,p.y-O[1],dz)||1; ax+=dx/l*rad; ay+=(p.y-O[1])/l*rad; az+=dz/l*rad; }
+        const w=this.vol.orb(u,p.r); if(w){ const a=w*dt,c=Math.cos(a),s=Math.sin(a); p.x=O[0]+dx*c+dz*s; p.z=O[2]-dx*s+dz*c; } }
+      if(this.noise){ const f=this.noise.freq,s=this.noise.str(u,p.r)*1.5,tt=T*this.noise.scroll+p.seed;
+        ax+=vnoise(p.x*f+tt,p.y*f,p.z*f)*s; ay+=vnoise(p.y*f,p.z*f+tt,p.x*f+17)*s; az+=vnoise(p.z*f+31,p.x*f,p.y*f+tt)*s; }
+      p.x+=(p.vx+ax)*dt; p.y+=(p.vy+ay)*dt; p.z+=(p.vz+az)*dt; p.svx=p.vx+ax; p.svy=p.vy+ay; p.svz=p.vz+az;
+      if(this.rol){ p.rz+=this.rol.z(u,p.rzs)*dt; p.ry+=this.rol.y(u,p.rys)*dt; }
+      if(this.tr){ const w=this.world(p), L=p.trail[p.trail.length-1];
+        if(!L||Math.hypot(w[0]-L[0],w[1]-L[1],w[2]-L[2])>this.tr.min) p.trail.push([w[0],w[1],w[2],p.age]);
+        const keep=this.tr.life*p.life; while(p.trail.length&&p.age-p.trail[0][3]>keep) p.trail.shift(); }
+      out.push(p); }
+    this.ps=out; }
+}
+class Effect {
+  constructor(opt,seed,offset,tOff){ this.R=rng(seed); this.offset=offset; this.t=-tOff;
+    const sp=opt.spec, defs=sp.defaults||{};
+    this.ems=sp.emitters.filter(e=>!e.remove).map((s,i)=>new Em(s,i,this,defs));
+    const by=Object.fromEntries(this.ems.map(e=>[e.name,e]));
+    for(const e of this.ems) for(const s of e.subList){ const t=by[s.emitter]; if(t){ t.isSub=true;
+      e.subs.push({em:t,type:s.type||'Death',inh:String(s.inherit||'').includes('Color')}); } }
+    this.ems.forEach(e=>e.start());
+    this.sorted=[...this.ems].sort((a,b)=>a.order-b.order||a.i-b.i);
+    this.scale=sp.root&&sp.root.scale!==undefined?(Array.isArray(sp.root.scale)?sp.root.scale[0]:sp.root.scale):1; }
+  step(){ this.t+=STEP; for(const e of this.ems) e.step(STEP); }
+  advance(t){ let guard=0; while(this.t+STEP<=t+1e-9&&guard++<2000) this.step(); }
+  length(){ return Math.max(...this.ems.map(e=>e.delay+(e.loop?e.dur*2:e.dur)+e.lifeMax)); }
+}
+
+/* ---------- view, render ---------- */
+function makeView(rect,zoom){ const v=SETUP.view||'iso', p=(v==='side'?0:v==='top'?90:(SETUP.pitch??40))*D2R;
+  const frame=zoom==='close'?(SETUP.closeFrame||SETUP.frame/2):SETUP.frame, ppm=rect.w/frame, o=SETUP.origin||[.5,.6];
+  const fw=SETUP.frame*ppm, fh=fw/(SETUP.aspect||16/9), ox=rect.x+rect.w*o[0], oy=rect.y+rect.h*o[1];
+  return { v, cy:Math.cos(p), sy:Math.sin(p), flat:Math.max(Math.sin(p),.06), ppm, ox, oy, rect,
+           game:{x:ox-o[0]*fw, y:oy-o[1]*fh, w:fw, h:fh} }; }
+const P=(V,x,y,z)=>[V.ox+x*V.ppm, V.oy-(y*V.cy+z*V.sy)*V.ppm];
+function lum(hex){ const c=col(hex); return .3*c[0]+.59*c[1]+.11*c[2]; }
+
+function drawGround(ctx,V){ const bg=SETUP.bg[UI.bg]; ctx.fillStyle=bg; ctx.fillRect(V.rect.x,V.rect.y,V.rect.w,V.rect.h);
+  const ink=lum(bg)>.5?'0,0,0':'255,255,255'; ctx.strokeStyle=`rgba(${ink},.07)`; ctx.lineWidth=DPR;
+  if(V.v==='side'){ ctx.beginPath(); ctx.moveTo(V.rect.x,V.oy); ctx.lineTo(V.rect.x+V.rect.w,V.oy); ctx.stroke(); return; }
+  const N=Math.ceil(SETUP.frame); ctx.beginPath();
+  for(let i=-N;i<=N;i++){ let a=P(V,i,0,-N),b=P(V,i,0,N); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]);
+    a=P(V,-N,0,i); b=P(V,N,0,i); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); } ctx.stroke(); }
+function drawChar(ctx,V){ const c=SETUP.char; if(!c||!UI.char) return; const ink=lum(SETUP.bg[UI.bg])>.5?'rgba(0,0,0,.28)':'rgba(255,255,255,.16)';
+  ctx.fillStyle=ink; const [x,z]=c.at, b=P(V,x,0,z), w=.5*V.ppm;
+  if(V.v==='top'){ ctx.beginPath(); ctx.arc(b[0],b[1],.3*V.ppm,0,7); ctx.fill(); return; }
+  const h=c.height*V.cy*V.ppm; ctx.beginPath(); ctx.roundRect(b[0]-w/2,b[1]-h*.82,w,h*.82,w/2); ctx.fill();
+  ctx.beginPath(); ctx.arc(b[0],b[1]-h*.9,w*.36,0,7); ctx.fill(); }
+function groundPoly(){ const o=SETUP.overlay; if(!o) return null; const pts=[];
+  if(o.circle){ for(let i=0;i<=72;i++){ const a=i/72*Math.PI*2; pts.push([Math.sin(a)*o.circle,Math.cos(a)*o.circle]); } }
+  else if(o.cone){ const {r,angle,yaw=0}=o.cone; pts.push([0,0]); for(let i=0;i<=36;i++){ const a=(yaw-angle/2+angle*i/36)*D2R; pts.push([Math.sin(a)*r,Math.cos(a)*r]); } pts.push([0,0]); }
+  else if(o.box){ const {w,l,yaw=0}=o.box, c=Math.cos(yaw*D2R), s=Math.sin(yaw*D2R);
+    for(const [x,z] of [[-w/2,0],[w/2,0],[w/2,l],[-w/2,l],[-w/2,0]]) pts.push([x*c+z*s,-x*s+z*c]); }
+  return pts; }
+function drawShape(ctx,V){ const pts=groundPoly(); if(!pts||!UI.shape) return; ctx.save(); ctx.setLineDash([6*DPR,5*DPR]);
+  ctx.strokeStyle='rgba(255,64,64,.95)'; ctx.lineWidth=1.5*DPR; ctx.beginPath();
+  pts.forEach(([x,z],i)=>{ const q=P(V,x,0,z); i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); }); ctx.stroke(); ctx.restore(); }
+
+const OFF={ bloom:cvs(8,8), bloom2:cvs(8,8), heat:cvs(8,8) };
+function prepOff(c,w,h){ if(c.width!==w||c.height!==h){ c.width=w; c.height=h; } const x=c.getContext('2d',{willReadFrequently:c===OFF.heat});
+  x.setTransform(1,0,0,1,0,0); x.globalCompositeOperation='source-over'; x.globalAlpha=1; x.clearRect(0,0,w,h); return x; }
+const HEAT=[null,[40,80,255],[60,225,110],[255,225,60],[255,225,60],[255,140,30],[255,140,30],[255,40,40],[255,40,40]];
+
+/* draws every effect into V.rect; returns {fse, alive} for effects[0] */
+function renderScene(ctx,V,effects,opt,t){
+  const R=V.rect; ctx.save(); ctx.beginPath(); ctx.rect(R.x,R.y,R.w,R.h); ctx.clip();
+  drawGround(ctx,V); drawChar(ctx,V);
+  const bw=Math.max(8,Math.round(R.w/4)), bh=Math.max(8,Math.round(R.h/4)), bx=UI.bloom?prepOff(OFF.bloom,bw,bh):null;
+  const hx=UI.heat?prepOff(OFF.heat,bw,bh):null;
+  let area=0, alive=0; const G=V.game, gA=G.w*G.h;
+  const clipFrac=(cx,cy,ex,ey)=>{ const w=Math.max(0,Math.min(cx+ex,G.x+G.w)-Math.max(cx-ex,G.x)), h=Math.max(0,Math.min(cy+ey,G.y+G.h)-Math.max(cy-ey,G.y)); return ex>0&&ey>0?w*h/(4*ex*ey):0; };
+  effects.forEach((fx,fi)=>{ const S=fx.scale;
+    for(const em of fx.sorted){ if(fi===0) alive+=em.ps.length;
+      const B=base(em.tex), add=em.blend!=='alpha'; ctx.globalCompositeOperation=add?'lighter':'source-over';
+      for(const p of em.ps){ const u=p.age/p.life, W=em.world(p).map(v=>v*S);
+        let c=p.c; if(em.col){ const k=em.col(u); c=[c[0]*k[0],c[1]*k[1],c[2]*k[2],c[3]*k[3]]; }
+        if(em.ub.inten){ const k=em.ub.inten(u,p.r); c=[c[0]*k,c[1]*k,c[2]*k,c[3]]; }
+        if(c[3]<=.003) continue;
+        let sx=p.sz[0]*S, sy=p.sz[1]*S, sz=p.sz[2]*S;
+        if(em.sol){ if(em.sol.one){ const k=em.sol.one(u,p.r); sx*=k; sy*=k; sz*=k; } else { sx*=em.sol.sep[0](u,p.r); sy*=em.sol.sep[1](u,p.r); sz*=em.sol.sep[2](u,p.r); } }
+        const s=P(V,W[0],W[1],W[2]); let a,b,cc,d,tx=s[0],ty=s[1],tex=em.tex;
+        if(em.mode==='Mesh'&&B.vert){
+          if(V.v==='top'){ tex=B.vert==='cone'?'mesh:ring:'+B.top:'mesh:disc'; a=2*sx*V.ppm; b=0; cc=0; d=2*sz*V.ppm; }
+          else if(B.vert==='cone'){ const h=sy*V.cy*V.ppm; a=2*sx*V.ppm; b=0; cc=0; d=h; ty-=h/2; }
+          else { a=2*sx*V.ppm; b=0; cc=0; d=2*sy*V.cy*V.ppm; } }
+        else if((em.mode==='Mesh'&&em.face!=='camera')||em.mode==='HorizontalBillboard'){
+          const ya=(em.mode==='Mesh'?p.ry:p.rz)*D2R, co=Math.cos(ya), si=Math.sin(ya), k=em.mode==='Mesh'?2:1;
+          a=co*sx*k*V.ppm; b=si*V.flat*sx*k*V.ppm; cc=-si*sz*k*V.ppm; d=co*V.flat*sz*k*V.ppm; }
+        else if(em.mode==='Stretch'){ const e=P(V,W[0]+(p.svx||0)*.01,W[1]+(p.svy||0)*.01,W[2]+(p.svz||0)*.01);
+          let dx=e[0]-s[0], dy=e[1]-s[1]; const sl=Math.hypot(dx,dy), wl=Math.hypot(p.svx||0,p.svy||0,p.svz||0)*.01*V.ppm||1;
+          const L=(sx*em.lScale+Math.hypot(p.svx||0,p.svy||0,p.svz||0)*em.vScale)*V.ppm*(sl/wl);
+          if(sl<1e-6){ dx=1; dy=0; } else { dx/=sl; dy/=sl; }
+          a=dx*Math.max(L,sx*V.ppm*.5); b=dy*Math.max(L,sx*V.ppm*.5); cc=-dy*sx*V.ppm; d=dx*sx*V.ppm; }
+        else { const r=-p.rz*D2R, co=Math.cos(r), si=Math.sin(r), k=em.mode==='Mesh'?2:1;
+          a=co*sx*k*V.ppm; b=si*sx*k*V.ppm; cc=-si*sy*k*V.ppm; d=co*sy*k*V.ppm; }
+        const ek=em.ub.erode?Math.round(clamp(em.ub.erode(u,p.r)+em.ub.base)*E):Math.round(clamp(em.ub.base)*E);
+        if(ek>=E) continue;
+        const body=variant(tex,em.ub.ramp,em.ub.rk,ek,'body',em.ub.ew);
+        ctx.setTransform(a,b,cc,d,tx,ty); ctx.globalAlpha=clamp(c[3]);
+        ctx.drawImage(tint(body,`${tex}|${em.ub.rk}|${ek}|b`,c[0],c[1],c[2]),-.5,-.5,1,1);
+        let edge=null; if(em.ub.edge&&ek>0){ edge=variant(tex,null,'',ek,'edge',em.ub.ew); const ec=em.ub.edge;
+          ctx.globalCompositeOperation='lighter'; ctx.drawImage(tint(edge,`${tex}|${ek}|e${em.ub.ew}`,ec[0],ec[1],ec[2]),-.5,-.5,1,1);
+          ctx.globalCompositeOperation=add?'lighter':'source-over'; }
+        if(bx){ const xr=Math.max(0,c[0]-.9),xg=Math.max(0,c[1]-.9),xb=Math.max(0,c[2]-.9);
+          if(xr+xg+xb>.02){ bx.setTransform(a/4,b/4,cc/4,d/4,(tx-R.x)/4,(ty-R.y)/4); bx.globalAlpha=clamp(c[3]); bx.globalCompositeOperation='lighter';
+            bx.drawImage(tint(body,`${tex}|${em.ub.rk}|${ek}|b`,xr,xg,xb),-.5,-.5,1,1);
+            if(edge){ const ec=em.ub.edge; bx.drawImage(tint(edge,`${tex}|${ek}|e${em.ub.ew}`,Math.max(0,ec[0]-.9),Math.max(0,ec[1]-.9),Math.max(0,ec[2]-.9)),-.5,-.5,1,1); } } }
+        if(fi===0){ const ex=(Math.abs(a)+Math.abs(cc))/2, ey=(Math.abs(b)+Math.abs(d))/2;
+          area+=Math.abs(a*d-b*cc)*base(tex).cov*clipFrac(tx,ty,ex,ey);
+          if(hx){ hx.setTransform(a/4,b/4,cc/4,d/4,(tx-R.x)/4,(ty-R.y)/4); hx.globalAlpha=1/32; hx.globalCompositeOperation='lighter';
+            hx.drawImage(variant(tex,null,'',0,'solid',0),-.5,-.5,1,1); } }
+      }
+      if(em.tr){ ctx.setTransform(1,0,0,1,0,0); ctx.globalCompositeOperation=em.tblend==='alpha'?'source-over':'lighter'; ctx.lineCap='round';
+        for(const p of em.ps){ const T=p.trail; if(!T||!T.length) continue; const head=em.world(p), pts=[...T.map(q=>[q[0],q[1],q[2]]),head];
+          let c=p.c; if(em.col){ const k=em.col(p.age/p.life); c=c.map((v,i)=>v*k[i]); }
+          for(let i=pts.length-1;i>0;i--){ const f=1-(i-1)/(pts.length-1), s0=P(V,...pts[i].map(v=>v*S)), s1=P(V,...pts[i-1].map(v=>v*S));
+            const tc=em.tr.c?em.tr.c(f):[1,1,1,1], w=Math.max(.5,p.sz[0]*S*em.tr.w(f,p.r)*V.ppm);
+            ctx.globalAlpha=clamp(c[3]*tc[3]*(1-f*.15)); ctx.strokeStyle=`rgb(${clamp(c[0]*tc[0])*255},${clamp(c[1]*tc[1])*255},${clamp(c[2]*tc[2])*255})`;
+            ctx.lineWidth=w; ctx.beginPath(); ctx.moveTo(s0[0],s0[1]); ctx.lineTo(s1[0],s1[1]); ctx.stroke();
+            if(fi===0) area+=Math.hypot(s1[0]-s0[0],s1[1]-s0[1])*w*.8; } } }
+    } });
+  ctx.setTransform(1,0,0,1,0,0); ctx.globalAlpha=1;
+  if(bx){ const b2=prepOff(OFF.bloom2,Math.max(4,bw>>2),Math.max(4,bh>>2)); b2.imageSmoothingQuality='high'; b2.drawImage(OFF.bloom,0,0,OFF.bloom2.width,OFF.bloom2.height);
+    ctx.globalCompositeOperation='lighter'; ctx.imageSmoothingQuality='high';
+    ctx.globalAlpha=.9; ctx.drawImage(OFF.bloom,R.x,R.y,R.w,R.h); ctx.globalAlpha=1; ctx.drawImage(OFF.bloom2,R.x,R.y,R.w,R.h); }
+  ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=1;
+  if(opt.draw){ const Vx={...V,P:(x,y,z)=>P(V,x,y,z),fill:px=>{ area+=px; }}; ctx.save(); opt.draw(ctx,t,Vx); ctx.restore(); }
+  if(hx){ const im=hx.getImageData(0,0,bw,bh), out=new ImageData(bw,bh);
+    for(let i=0;i<bw*bh;i++){ const n=Math.round(im.data[i*4+3]/(255/32)); if(!n) continue; const c=n>=10?[255,255,255]:HEAT[Math.min(n,8)];
+      out.data[i*4]=c[0]; out.data[i*4+1]=c[1]; out.data[i*4+2]=c[2]; out.data[i*4+3]=200; }
+    hx.putImageData(out,0,0); ctx.imageSmoothingEnabled=false; ctx.drawImage(OFF.heat,R.x,R.y,R.w,R.h); ctx.imageSmoothingEnabled=true; }
+  drawShape(ctx,V);
+  ctx.restore();
+  return { fse:area/gA, alive }; }
+
+/* ---------- measure: one fixed-seed run, every 2nd frame, at gameplay zoom ---------- */
+function measure(card){ const c=OFF.meas||(OFF.meas=cvs(192,Math.round(192/(SETUP.aspect||16/9))));
+  const ctx=c.getContext('2d'), keep={bloom:UI.bloom,heat:UI.heat,copies:UI.copies}; UI.bloom=false; UI.heat=false;
+  const fx=[new Effect(card.opt,1,[0,0,0],0)], V=makeView({x:0,y:0,w:c.width,h:c.height},'game'), pk={fse:0,at:0,alive:0,active:0};
+  try{ for(let t=0;t<=card.len+1e-6;t+=STEP*2){ fx[0].advance(t); const r=renderScene(ctx,V,fx,card.opt,t);
+      if(r.fse>pk.fse){ pk.fse=r.fse; pk.at=t; } pk.alive=Math.max(pk.alive,r.alive); if(r.alive>0) pk.active=t; } }
+  finally{ Object.assign(UI,keep); }
+  return pk; }
+
+/* ---------- cards ---------- */
+const grid=document.getElementById('grid'), cards=[];
+document.getElementById('subject').textContent='- '+SUBJECT;
+const budget=BUDGET[SETUP.role]||.5;
+function copyOffsets(n){ const o=[[0,0,0]]; for(let i=1;i<n;i++){ const a=i*2.4, r=SETUP.frame*.22*(.6+.4*((i*37)%7)/7); o.push([Math.cos(a)*r*1.3,0,Math.sin(a)*r*.6]); } return o; }
+function spawn(card,seed){ const offs=copyOffsets(UI.copies);
+  card.fx=offs.map((o,i)=>new Effect(card.opt,seed*31+i*977,o,i*.13)); }
+
+for(const opt of OPTIONS){
+  const el=document.createElement('div'); el.className='card'; el.dataset.k=opt.key;
+  const issues=validate(opt);
+  el.innerHTML=`<div class="hd"><div class="key">${opt.key}</div><div><div class="name">${opt.name}</div>
+    <div class="desc">${opt.desc||''}</div><div class="read"><b>reads as</b> ${opt.read||'-'}</div></div></div>
+    <div class="stage"><canvas></canvas></div><canvas class="tl"></canvas><div class="stats"></div>
+    <div class="chips">${issues.map(i=>`<span class="chip${i.err?' err':''}">${i.t}</span>`).join('')}</div>
+    <div class="ft"><div class="unity" title="${String(opt.unity||'').replace(/"/g,'&quot;')}">${opt.unity||''}</div>
+    <button class="rp">replay</button><button class="cp">copy spec</button></div>`;
+  grid.appendChild(el);
+  const card={opt,el,cv:el.querySelector('.stage canvas'),tl:el.querySelector('.tl'),st:el.querySelector('.stats'),
+              t:0,seed:1,cycle:opt.cycle||2,err:null};
+  try{ spawn(card,1); card.len=card.fx[0].length(); card.m=measure(card); } catch(e){ card.err=e; }
+  if(card.m){ const chips=el.querySelector('.chips'), add=t=>chips.insertAdjacentHTML('beforeend',`<span class="chip">${t}</span>`);
+    const loops=card.fx[0].ems.some(e=>e.loop);
+    if(!loops&&card.m.active>card.cycle) add(`cycle ${card.cycle}s cuts the effect (active ${card.m.active.toFixed(2)}s)`);
+    const b=opt.beats||{}; if(!loops&&b.end!=null&&card.m.active>b.end+.5) add(`tail ${(card.m.active-b.end).toFixed(2)}s after end (keep under 0.5s)`); }
+  const replay=()=>{ card.seed++; card.t=0; try{ spawn(card,card.seed); }catch(e){ card.err=e; } };
+  el.querySelector('.rp').onclick=replay; el.querySelector('.stage').onclick=replay; card.replay=replay;
+  el.querySelector('.cp').onclick=()=>{ const txt=JSON.stringify(opt.spec,null,1);
+    (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).catch(()=>{ const ta=document.createElement('textarea');
+      ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); });
+    el.querySelector('.cp').textContent='copied'; setTimeout(()=>el.querySelector('.cp').textContent='copy spec',900); };
+  cards.push(card);
+}
+const maxCycle=Math.max(...cards.map(c=>c.cycle));
+
+function sizeCanvas(cv,w,h){ const W=Math.round(w*DPR),H=Math.round(h*DPR); if(cv.width!==W||cv.height!==H){ cv.width=W; cv.height=H; } }
+function drawTimeline(card){ const cv=card.tl, w=cv.clientWidth; sizeCanvas(cv,w,20); const x=cv.getContext('2d'), W=cv.width, H=cv.height, T=card.cycle, b=card.opt.beats||{};
+  x.clearRect(0,0,W,H); x.fillStyle='rgba(255,255,255,.06)'; x.fillRect(0,H*.35,W,H*.3);
+  const X=t=>clamp(t/T)*W;
+  if(b.antic){ x.fillStyle='rgba(122,168,255,.45)'; x.fillRect(X(b.antic[0]),H*.35,X(b.antic[1])-X(b.antic[0]),H*.3); }
+  if(b.end!=null){ x.fillStyle='rgba(255,255,255,.12)'; x.fillRect(X(b.impact??0),H*.35,X(b.end)-X(b.impact??0),H*.3); }
+  x.font=`${10*DPR}px ui-monospace,Consolas,monospace`; x.fillStyle='rgba(255,255,255,.55)';
+  if(b.impact!=null){ x.fillStyle='#fff'; x.fillRect(X(b.impact)-DPR,0,2*DPR,H); x.fillText(`hit ${b.impact}s`,Math.min(X(b.impact)+4*DPR,W-60*DPR),H*.3); }
+  if(b.end!=null){ x.fillStyle='rgba(255,255,255,.55)'; x.fillText(`end ${b.end}s`,Math.min(X(b.end)+4*DPR,W-60*DPR),H*.95); }
+  x.fillStyle='#ffcc33'; x.fillRect(X(card.t)-DPR,0,2*DPR,H); }
+function drawStats(card){ const m=card.m; if(!m||card.stDone) return; card.stDone=1;
+  const f=m.fse, cls=f<=budget?'ok':f<=budget*1.5?'warn':'bad';
+  card.st.innerHTML=`FSE peak <b class="${cls}">${f.toFixed(2)}</b> / ${budget} ${SETUP.role} @${m.at.toFixed(2)}s · alive peak <b>${m.alive}</b> · active ${m.active.toFixed(2)}s · ${card.opt.spec.emitters.length} emitters`; }
+function stageRect(cv){ const w=cv.parentElement.clientWidth; return {w, h:w/(SETUP.aspect||16/9)}; }
+function frameCard(card){
+  if(card.err){ if(!card.el.querySelector('.crash')){ const d=document.createElement('div'); d.className='crash'; d.textContent=String(card.err.stack||card.err); card.el.querySelector('.stage').appendChild(d); } return; }
+  const {w,h}=stageRect(card.cv); sizeCanvas(card.cv,w,h); const ctx=card.cv.getContext('2d');
+  const t=Math.min(card.t,card.cycle);
+  try{
+    if(card.fx[0].t>t+1e-6) spawn(card,card.seed);
+    card.fx.forEach(f=>f.advance(t));
+    const V=makeView({x:0,y:0,w:card.cv.width,h:card.cv.height},UI.zoom);
+    renderScene(ctx,V,card.fx,card.opt,t); drawStats(card);
+  }catch(e){ card.err=e; }
+  drawTimeline(card); }
+
+/* ---------- sheet mode: 8 cells at the same times as vfx-capture.cs ---------- */
+function renderSheet(){
+  for(const card of cards){ if(card.err){ frameCard(card); continue; }
+    const cols=4, rows=2, w=card.cv.parentElement.clientWidth, cw=w/cols, ch=cw/(SETUP.aspect||16/9);
+    sizeCanvas(card.cv,w,ch*rows); const ctx=card.cv.getContext('2d'); ctx.clearRect(0,0,card.cv.width,card.cv.height);
+    const L=card.m&&card.m.active>0?card.m.active+STEP*2:card.len, times=(card.opt.sheetTimes||Array.from({length:8},(_,i)=>+(L*(i+.5)/8).toFixed(3)));
+    try{ times.slice(0,8).forEach((t,i)=>{ const fx=[new Effect(card.opt,1,[0,0,0],0)]; fx[0].advance(t);
+      const rect={x:(i%cols)*cw*DPR,y:Math.floor(i/cols)*ch*DPR,w:cw*DPR,h:ch*DPR};
+      const r=renderScene(ctx,makeView(rect,UI.zoom),fx,card.opt,t);
+      ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(rect.x,rect.y,74*DPR,15*DPR); ctx.fillStyle='#fff';
+      ctx.font=`${10*DPR}px ui-monospace,Consolas,monospace`; ctx.fillText(`${t.toFixed(2)}s · ${r.alive}`,rect.x+4*DPR,rect.y+11*DPR);
+      ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=DPR; ctx.strokeRect(rect.x,rect.y,rect.w,rect.h); }); }
+    catch(e){ card.err=e; frameCard(card); }
+    card.t=0; drawTimeline(card); drawStats(card); } }
+
+/* ---------- loop and controls ---------- */
+let last=performance.now();
+function tick(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
+  if(!UI.sheet){ for(const c of cards){ if(!UI.paused){ c.t+=dt*UI.speed;
+        if(c.t>c.cycle) c.replay(); }
+      frameCard(c); }
+    if(!UI.paused){ scrub.value=Math.round(Math.min(1,(cards[0]?.t||0)/maxCycle)*1000); tv.textContent=(cards[0]?.t||0).toFixed(2)+'s'; } }
+  requestAnimationFrame(tick); }
+const $=id=>document.getElementById(id), scrub=$('scrub'), tv=$('tv');
+const setBtn=(id,on,label)=>{ const b=$(id); b.classList.toggle('on',!!on); if(label) b.textContent=label; };
+function syncButtons(){ setBtn('play',UI.paused,UI.paused?'▶ play':'⏸ pause'); setBtn('bloom',UI.bloom,UI.bloom?'bloom on':'bloom off');
+  setBtn('grey',UI.grey); setBtn('copies',UI.copies>1,'×'+UI.copies); setBtn('zoom',UI.zoom==='close',UI.zoom==='close'?'close':'gameplay');
+  setBtn('char',UI.char); setBtn('shape',UI.shape); setBtn('heat',UI.heat); setBtn('sheet',UI.sheet); $('bg').textContent='bg: '+UI.bg;
+  if(SETUP.bloom===false) $('bloom').title='the target tier has no Bloom'; document.body.classList.toggle('grey',UI.grey); }
+function restartAll(){ cards.forEach(c=>{ c.t=0; try{ spawn(c,c.seed); }catch(e){ c.err=e; } }); if(UI.sheet) renderSheet(); }
+const setT=t=>{ cards.forEach(c=>c.t=Math.min(t,c.cycle)); tv.textContent=t.toFixed(2)+'s'; scrub.value=Math.round(t/maxCycle*1000); };
+$('play').onclick=()=>{ UI.paused=!UI.paused; syncButtons(); };
+scrub.oninput=()=>{ UI.paused=true; syncButtons(); setT(scrub.value/1000*maxCycle); };
+$('speed').oninput=e=>{ UI.speed=e.target.value/100; $('sv').textContent=UI.speed.toFixed(2)+'x'; };
+$('bg').onclick=()=>{ UI.bg={dark:'mid',mid:'bright',bright:'dark'}[UI.bg]; syncButtons(); if(UI.sheet) renderSheet(); };
+$('bloom').onclick=()=>{ UI.bloom=!UI.bloom; syncButtons(); if(UI.sheet) renderSheet(); };
+$('grey').onclick=()=>{ UI.grey=!UI.grey; syncButtons(); };
+$('copies').onclick=()=>{ UI.copies=UI.copies===1?5:1; syncButtons(); restartAll(); };
+$('zoom').onclick=()=>{ UI.zoom=UI.zoom==='game'?'close':'game'; syncButtons(); if(UI.sheet) renderSheet(); };
+$('char').onclick=()=>{ UI.char=!UI.char; syncButtons(); if(UI.sheet) renderSheet(); };
+$('shape').onclick=()=>{ UI.shape=!UI.shape; syncButtons(); if(UI.sheet) renderSheet(); };
+$('heat').onclick=()=>{ UI.heat=!UI.heat; syncButtons(); if(UI.sheet) renderSheet(); };
+$('sheet').onclick=()=>{ UI.sheet=!UI.sheet; syncButtons(); if(UI.sheet) renderSheet(); else restartAll(); };
+addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT') return; const k=e.key.toLowerCase(), i='abcd'.indexOf(k);
+  if(i>=0&&cards[i]) cards[i].replay();
+  else if(k===' '){ e.preventDefault(); $('play').click(); }
+  else if(k==='['||k===']'){ UI.paused=true; syncButtons(); setT(Math.max(0,(cards[0]?.t||0)+(k===']'?STEP:-STEP))); }
+  else if(k==='1'||k==='2'||k==='3'){ UI.bg=['dark','mid','bright'][+k-1]; syncButtons(); if(UI.sheet) renderSheet(); }
+  else if(k==='b') $('bloom').click(); else if(k==='g') $('grey').click(); else if(k==='h') $('heat').click();
+  else if(k==='c') $('copies').click(); else if(k==='z') $('zoom').click(); });
+addEventListener('resize',()=>{ if(UI.sheet) renderSheet(); });
+syncButtons();
+if(UI.sheet) renderSheet();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

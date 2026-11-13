@@ -16,6 +16,9 @@ holds what every effect shares. The domain skill on top adds the rules of its do
 | ambient, weather, water, fire, fog | `vfx-environment` | does it loop forever, cull off-screen, and stay cheap at scale? |
 | garments, outfit reveal, aura, sparkle | `vfx-clothing` | does it follow the skinned body and stay subordinate to the outfit? |
 
+Look not decided yet: `vfx-brainstorm` shows 4 directions in a browser preview, at the gameplay
+camera and with their cost, before anything is built; its picked spec feeds the workflow below.
+
 A project's own `CLAUDE.md`, `AGENTS.md` or VFX style guide wins on conflict.
 
 ## Rule 0 - Understand the effect before building it
@@ -32,7 +35,7 @@ in ONE `AskUserQuestion`. The brief has, at minimum:
 4. **Style** - the project's family (toon/anime, stylized, realistic), 3-5 style keywords, palette,
    edge treatment. Read existing effects in the project first; a new effect must sit next to them.
 5. **References** - images or video from the user. Break each one down (see below). No references
-   and no existing effects = propose 2-3 style directions in words and let the user pick.
+   and no existing effects = `vfx-brainstorm`: 4 directions the user watches and picks from.
 6. **Timeline** - anticipation, impact/peak, dissipation, total length; loop or one-shot.
 7. **Importance and copies** - 1-10 rating (idle and frequent effects dim, rare game-changers bright)
    and the worst-case number on screen at once.
@@ -144,7 +147,8 @@ stream list batch together.
 
 ## Workflow
 
-1. **Brief** (Rule 0). Then invoke the domain skill and add its questions.
+1. **Brief** (Rule 0). Then invoke the domain skill and add its questions. Look undecided:
+   `vfx-brainstorm` first, and its locked contract is the brief.
 2. **Plan layers in text** before any tool call: per layer - role, mesh or particle, texture,
    blend, sorting order, timing, count. Check the plan against Rules 2-4.
 3. **Assets**: list what exists (`Glob` the project's VFX folders, textures and meshes); generate

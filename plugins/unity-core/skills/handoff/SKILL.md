@@ -22,7 +22,7 @@ Before any other research: read `AGENTS.md` (especially its `## Local skills` se
 | C# scripts | `coding` + `recompile` |
 | Panel / popup / widget / button | `ui-panel` |
 | Building UI from a mockup image | `ui-from-image` |
-| Choosing an animation or effect | `brainstorm` |
+| Choosing how a UI animation or an effect looks | `ui-brainstorm`, `vfx-brainstorm` |
 | Tracked README / CHANGELOG / package.json | `docs` |
 | Proving behavior in Play mode | `verify` |
 | Git, commit, tag, version bump | `release` |

@@ -1,7 +1,7 @@
 {
   "name": "unity-ui",
-  "version": "1.0.0",
-  "description": "uGUI workflow for Unity: panel lifecycle and layout rules, building a panel prefab from a mockup image, and brainstorming UI effects as an HTML preview.",
+  "version": "1.0.1",
+  "description": "uGUI workflow for Unity: panel lifecycle and layout rules, building a panel prefab from a mockup image, and brainstorming UI animations as an HTML preview.",
   "homepage": "https://github.com/BingoBoiz/unity-skill-plugins",
   "repository": "https://github.com/BingoBoiz/unity-skill-plugins",
   "license": "UNLICENSED",
@@ -16,7 +16,7 @@
   "interface": {
     "displayName": "Unity UI",
     "shortDescription": "uGUI panels, mockup-to-prefab, UI effects",
-    "longDescription": "Panel lifecycle, anchors and layering rules, mockup-to-prefab pipeline, and UI effect brainstorming for Unity uGUI.",
+    "longDescription": "Panel lifecycle, anchors and layering rules, mockup-to-prefab pipeline, and UI animation brainstorming for Unity uGUI.",
     "category": "Developer Tools",
     "capabilities": [],
     "defaultPrompt": [

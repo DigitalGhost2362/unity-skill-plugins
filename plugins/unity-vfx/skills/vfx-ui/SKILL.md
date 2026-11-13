@@ -1,14 +1,14 @@
 ---
 name: vfx-ui
-description: UI VFX in Unity uGUI - particles and shader effects inside a Canvas - reward bursts, coin/gem fly to a counter, rarity glows and shine sweeps, button and unlock feedback, level-up and gacha reveals, popup sparkle, dissolve and transition effects. Holds how to get particles to render in a Canvas (UI particle package, camera-canvas sorting sandwich, or tween-only), UI shaders and masking, effects that keep running while the game is paused, aspect-ratio and scaler independence, rarity tier ladder, and UI overdraw. Invoke with vfx-core for any VFX that lives in the UI - "hiệu ứng UI", "particle trên UI", "coin bay", "glow item hiếm", "shine", "reward effect", "hiệu ứng mở rương". Choosing the look of a UI animation first is the brainstorm skill (unity-ui); panel wiring is ui-panel.
+description: UI VFX in Unity uGUI - particles and shader effects inside a Canvas - reward bursts, coin/gem fly to a counter, rarity glows and shine sweeps, button and unlock feedback, level-up and gacha reveals, popup sparkle, dissolve and transition effects. Holds how to get particles to render in a Canvas (UI particle package, camera-canvas sorting sandwich, or tween-only), UI shaders and masking, effects that keep running while the game is paused, aspect-ratio and scaler independence, rarity tier ladder, and UI overdraw. Invoke with vfx-core for any VFX that lives in the UI - "hiệu ứng UI", "particle trên UI", "coin bay", "glow item hiếm", "shine", "reward effect", "hiệu ứng mở rương". Choosing the look first: tween motion is ui-brainstorm (unity-ui), particle or glow looks are vfx-brainstorm; panel wiring is ui-panel.
 ---
 
 # UI VFX
 
 Invoke `vfx-core` first. UI effects keep its rules (layers, motion, one material per look, budgets)
 but render through a Canvas, which changes how particles draw, sort, clip and scale. If the look is
-not decided yet, the `brainstorm` skill (unity-ui plugin, if installed) picks it in an HTML preview
-first; `ui-panel` owns the panel code the effect plugs into.
+not decided yet, pick it in an HTML preview first: `ui-brainstorm` (unity-ui plugin, if installed) for
+tween motion, `vfx-brainstorm` for particles and glow; `ui-panel` owns the panel code the effect plugs into.
 
 ## Rule 0 - The UI brief
 

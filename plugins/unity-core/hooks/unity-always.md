@@ -47,13 +47,14 @@ The last line of a turn that did Unity work is one status line, nothing after it
 |---|---|---|
 | any uGUI panel, popup, widget, button, HUD | `/ui-panel` | `reference/baseui-framework.md`, `reference/ui-reference-hierarchy.md` |
 | building UI from a mockup image | `/ui-from-image` | `reference/project-facts-template.md` |
-| choosing how a UI effect or animation looks | `/brainstorm` | `reference/fx-vocabulary.md` |
+| choosing how a UI tween animation looks (particle or glow looks: `/vfx-brainstorm`) | `/ui-brainstorm` | `reference/fx-vocabulary.md` |
 
 ## unity-vfx (if installed)
 
 | Before | Skill | Docs inside the skill |
 |---|---|---|
 | any particle, shader or effect work | `/vfx-core` | `reference/brief.md`, `reference/uber-material.md`, `reference/recipes.md`, `scripts/*.cs` |
+| choosing how an effect looks before building it | `/vfx-core` + `/vfx-brainstorm` | `assets/template.html`, `reference/vfx-vocabulary.md` |
 | combat effects: skills, hits, projectiles, AoE | `/vfx-core` + `/vfx-combat` | `scripts/vfx-fit.cs` |
 | effects inside a Canvas | `/vfx-core` + `/vfx-ui` | |
 | ambient, weather, water, fire props, fog, sky and sun look | `/vfx-core` + `/vfx-environment` | `reference/urp-environment-traps.md` |

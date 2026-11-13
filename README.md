@@ -32,13 +32,14 @@ form `/unity-core:coding` always works.
 |---|---|
 | [`/ui-panel`](plugins/unity-ui/skills/ui-panel/SKILL.md) | any panel, popup, widget, button or HUD element |
 | [`/ui-from-image`](plugins/unity-ui/skills/ui-from-image/SKILL.md) | building a panel prefab from a mockup image |
-| [`/brainstorm`](plugins/unity-ui/skills/brainstorm/SKILL.md) | choosing how a UI effect or animation looks |
+| [`/ui-brainstorm`](plugins/unity-ui/skills/ui-brainstorm/SKILL.md) | choosing how a UI animation looks (tween motion; particle looks are `/vfx-brainstorm`) |
 
 ### `unity-vfx` - real-time effects
 
 | Skill | Use before |
 |---|---|
 | [`/vfx-core`](plugins/unity-vfx/skills/vfx-core/SKILL.md) | any particle or effect work; the domain skills build on it |
+| [`/vfx-brainstorm`](plugins/unity-vfx/skills/vfx-brainstorm/SKILL.md) | choosing how an effect looks: 4 directions in one HTML preview at the gameplay camera, with overdraw and FSE per option, picked before anything is built |
 | [`/vfx-combat`](plugins/unity-vfx/skills/vfx-combat/SKILL.md) | skills, hits, projectiles, AoE telegraphs, buffs |
 | [`/vfx-ui`](plugins/unity-vfx/skills/vfx-ui/SKILL.md) | particles and shader effects inside a Canvas |
 | [`/vfx-environment`](plugins/unity-vfx/skills/vfx-environment/SKILL.md) | ambient, weather, water, fire props, fog |
@@ -47,7 +48,8 @@ form `/unity-core:coding` always works.
 `vfx-core` ships a URP uber shader (`assets/VFX_Uber.shader`) and Editor scripts run through
 `script-execute`: build an effect prefab, audit prefabs, measure real overdraw in full-screen
 equivalents (FSE), capture a contact sheet, and generate textures and meshes. `vfx-combat` adds a
-top-down check of an effect's reach against its damage shape.
+top-down check of an effect's reach against its damage shape. `vfx-brainstorm` ships a
+self-contained HTML harness that simulates `vfx-apply` specs, so the picked preview is the build spec.
 
 A project that does no UI work only needs `unity-core`; install `unity-vfx` where effects are made.
 A project can ship its own skills on top of these; the project skill wins on conflict.
