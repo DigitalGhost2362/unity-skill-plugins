@@ -1,6 +1,6 @@
 ---
 name: vfx-combat
-description: Combat VFX in Unity - skill and attack effects, hits and impacts, projectiles, slashes, AoE telegraphs and ground indicators, explosions, buffs and debuffs, heals, beams. Holds the rules that make a combat effect honest - the drawn shape equals the damage shape from the same config value, the impact lands on the hit frame, brightness follows importance, enemy and ally read apart - plus telegraph construction, timing and hitstop, readability with many copies, pooling and LOD, and a script that renders the effect top-down and checks its reach against the gameplay radius, cone or box. Invoke with vfx-core for any combat effect - "vfx chiêu", "hiệu ứng skill", "hit effect", "đạn", "chém", "vùng sát thương", "AoE", "telegraph", "nổ", "buff".
+description: Combat VFX in Unity (skills, hits, projectiles, slashes, AoE telegraphs, buffs, beams) whose drawn shape and timing must match gameplay. Use with vfx-core for any combat effect, e.g. "hiệu ứng skill", "hit effect", "vùng sát thương", "AoE", "telegraph".
 ---
 
 # Combat VFX

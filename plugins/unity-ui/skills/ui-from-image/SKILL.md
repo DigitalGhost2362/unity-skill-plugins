@@ -1,6 +1,6 @@
 ---
 name: ui-from-image
-description: Build a Unity UI panel/popup prefab from a mockup image the user sends. Use whenever the user attaches or references a UI screenshot/design and asks to build, recreate, or implement it ("lam panel nay", "lam UI tu anh nay", "dung cai nay ra prefab", "recreate this screen"). Covers the fast path - a pre-baked project facts file instead of exploring, building the prefab by running C# through the Editor instead of hand-writing YAML, matching sprites by native aspect ratio, the overlay-ghost alignment loop, and play-mode verification.
+description: Builds a Unity UI panel or popup prefab from a mockup image. Use when the user attaches a UI screenshot or design and asks to build or recreate it, e.g. "làm panel này", "làm UI từ ảnh này", "recreate this screen".
 ---
 
 # UI from image

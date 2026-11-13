@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: "Plan-only workflow for a Unity task: research and write a bulletproof implementation plan, then emit a single self-contained copy-paste prompt that another agent (one with Unity Editor access) executes. Use when the user wants a plan or a handoff prompt for another agent to do the coding, not for you to implement."
+description: Plans a Unity task and emits one copy-paste prompt for another agent with Editor access to execute. Use when the user wants a plan or a handoff prompt instead of having you implement it.
 ---
 
 # Handoff (you plan, another agent executes)

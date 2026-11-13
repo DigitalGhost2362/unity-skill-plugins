@@ -1,6 +1,6 @@
 ---
 name: sheet-data
-description: Read, edit and format a Google Sheet that the Google Sheet importer package (`com.feeder.editortools`, its GoogleSheet Importer window) turns into Raw*Data ScriptableObjects - the "Data Technical" sheets. Covers exactly what the importer reads and ignores, editing rows/columns/values without breaking an import, and styling a sheet for humans (bold header row, auto-fit widths, colored chip dropdowns for every enum, checkboxes, hex color swatches, header notes, _Enums and _Guide tabs, room for extra columns) with a script that proves the importer still reads the same data. Use for "sửa data technical", "thêm cột/dòng vào sheet data", "format lại sheet", "làm dropdown enum trên sheet", "ghi chú cho cột", "sheet import bị lỗi/sai dòng", or any Google Sheets change to a sheet whose row 2 holds n_/s_/f_/d_/b_ headers.
+description: Reads, edits and formats the Google "Data Technical" sheets that the com.feeder.editortools GoogleSheet Importer turns into Raw*Data ScriptableObjects (row 2 holds n_/s_/f_/d_/b_ headers). Use for any change to such a sheet (rows, columns, dropdowns, styling) or when its import breaks.
 ---
 
 # Data sheets

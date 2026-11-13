@@ -1,6 +1,6 @@
 ---
 name: vfx-core
-description: Shared foundation for every Unity VFX task - the brief (what the effect is for, gameplay data it must match, style, reference images or video), the build loop, the mesh-first rule for mobile, FSE overdraw budgets and how to measure them, Shuriken vs VFX Graph, one uber material with a fixed vertex-stream contract, layering and motion rules, texture rules, pooling/seed/culling, and the mistakes table. Ships the VFX/Uber shader and scripts that audit prefabs, measure real overdraw, and generate textures and meshes. Invoke BEFORE vfx-combat, vfx-ui, vfx-environment or vfx-clothing, and alone for any particle or effect request that fits none of them - "làm hiệu ứng", "làm vfx", "particle", "effect bị lag", "overdraw", "tối ưu vfx", "fix effect".
+description: Shared base for every Unity VFX task (brief, mesh-first, FSE overdraw budget, uber shader, audit and measure scripts). Use before any particle, shader or effect work, alone or under vfx-combat, vfx-ui, vfx-environment or vfx-clothing, e.g. "làm vfx", "particle", "effect bị lag", "overdraw".
 ---
 
 # VFX core

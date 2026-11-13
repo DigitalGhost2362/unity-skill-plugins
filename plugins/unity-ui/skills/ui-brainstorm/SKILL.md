@@ -1,6 +1,6 @@
 ---
 name: ui-brainstorm
-description: Brainstorm UI animation/effect ideas by building ONE self-contained HTML preview showing 4 labelled options (A/B/C/D) side by side, so the user can watch them run and pick one before any Unity code is written. Use whenever the user asks for effect/animation/juice ideas for a panel, popup, button, currency counter, reward, transition or any UI moment — "làm hiệu ứng cho X", "brainstorm effect", "gợi ý animation", "cho tôi vài option hiệu ứng", "panel này mở kiểu gì cho đẹp". Also use before implementing a non-trivial UI animation whose look has not been decided yet. Particle, glow or shader looks (in the world or in a Canvas) go to vfx-brainstorm (unity-vfx) instead.
+description: Previews 4 UI animation options (tween motion) in one HTML file so the user picks one before any Unity code. Use when the user wants ideas for how a panel, popup, button, counter or reward animates, e.g. "làm hiệu ứng cho X", "gợi ý animation", "panel này mở kiểu gì". Particle or glow looks use vfx-brainstorm.
 ---
 
 # UI FX Brainstorm

@@ -1,6 +1,6 @@
 ---
 name: coding
-description: Mandatory coding standard for ALL C# script work in any Unity project - gameplay, systems, editor tooling, refactors, and any non-trivial edit (UI code also follows ui-panel on top of this, when installed). Enforces minimalism, reuse-first (never duplicate a capability - timing, events, saving, async, config - that a shared system already provides), region grouping by concern, the leniency ladder, the near-zero comment policy, and one init convention (the name the project's CLAUDE.md sets, else Initialize()). Trigger on any request to write, add, refactor, fix, or review C# in a Unity project.
+description: Unity C# coding standard. Use before writing, editing, refactoring or reviewing any C# in a Unity project, editor tooling included; UI code also follows ui-panel.
 ---
 
 # Unity coding standard

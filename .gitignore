@@ -1,10 +1,47 @@
+# Public repo. Only the paths listed below are tracked at the root; anything else
+# (notes, reports, research, test fixtures, scratch) stays local until it is added here.
+/*
+!/.gitignore
+!/.gitattributes
+!/README.md
+!/.claude-plugin/
+!/.agents/
+!/plugins/
+!/docs/
+!/scripts/
+
+# Secrets and credentials, anywhere in the tree
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+*.jks
+*.secret
+*.secrets
+credentials*.json
+client_secret*.json
+service-account*.json
+service_account*.json
+token*.json
+.npmrc
+.pypirc
+
+# Local agent and editor state
+.claude/
+.review-loop/
+settings.local.json
+*.local.*
+.idea/
+.vs/
+.vscode/
+*.swp
 .DS_Store
 Thumbs.db
-*.swp
+
+# Build and tool output
 node_modules/
 __pycache__/
 *.pyc
-.idea/
-
-# local test fixtures and runners - never pushed
-/local-tests/

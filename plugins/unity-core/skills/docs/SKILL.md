@@ -1,6 +1,6 @@
 ---
 name: docs
-description: Mandatory workflow for writing or updating any TRACKED doc that ships with a Unity package or project - README.md, CHANGELOG.md, package.json descriptions, Documentation~/ARCHITECTURE.md, INTEGRATION-GUIDE.md, per-feature specs, sample READMEs. Holds the tracked-vs-internal split, the reader test, the doc-sync matrix (which files must move together when behavior changes), the voice rules, the ASCII punctuation rule, and the self-scan to run BEFORE handing work back instead of discovering leaks at commit time. Trigger on any request to write, translate, restructure, review or sync package documentation, changelog entries, or a feature spec.
+description: Writing rules for tracked docs that ship with a Unity package or project (README, CHANGELOG, package.json description, Documentation~, feature specs). Use when writing, translating, restructuring, reviewing or syncing any of them.
 ---
 
 # Package docs workflow (tracked docs only)

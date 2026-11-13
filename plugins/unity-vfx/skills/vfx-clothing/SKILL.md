@@ -1,6 +1,6 @@
 ---
 name: vfx-clothing
-description: Clothing and outfit VFX in Unity - effects on garments and characters for fashion, dress-up and customization games - sequin and glitter sparkle, holographic and iridescent fabric, rim and sheen, scrolling emissive patterns, dissolve outfit swaps, reveal moments, idle shimmer, auras, bokeh and petals around the character, particles emitted from the garment surface. Holds the choice between a material effect and attached particles, how to bind emitters and overlays to a SkinnedMeshRenderer so they follow every pose and body type, the rarity effect ladder, reveal and idle timing, cloth-simulation interplay, and the extra cost of overlay passes and skinned emission. Invoke with vfx-core for any VFX on an outfit or character - "hiệu ứng trang phục", "hiệu ứng quần áo", "outfit vfx", "lấp lánh", "kim tuyến", "sequin", "hologram", "aura nhân vật", "đổi đồ", "reveal outfit".
+description: VFX on garments and characters for dress-up and fashion games (sparkle, holographic fabric, dissolve outfit swaps, reveals, auras). Use with vfx-core for any effect on an outfit or character, e.g. "hiệu ứng trang phục", "lấp lánh", "hologram", "aura nhân vật", "đổi đồ".
 ---
 
 # Clothing VFX

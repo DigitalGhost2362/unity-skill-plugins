@@ -1,6 +1,6 @@
 ---
 name: solo
-description: Solo mode for a Unity Editor that only this agent drives while the user watches it live - no other agent will take the Editor, so skip any shared-Editor lock and test-case handoff, but every change must happen in plain sight in the Scene view - select, frame and repaint the object before and after each edit to lights, materials, shaders, meshes, transforms or scene layout, one visible step per call, one chat line announcing each step - and the agent runs the task start to finish while taking any advice or interrupt from the user at once. Use when the user says "solo", "/solo", "làm một mình", "tôi xem trên editor", "hiển thị lên scene view", "I'll watch the Editor", or hands over a scene, lighting, material, level-dressing or mesh-placement task to do live in the Editor.
+description: Solo mode for driving the Unity Editor alone while the user watches, every change shown live in the Scene view. Use when the user says "solo", "làm một mình", "tôi xem trên editor", or hands over a scene, lighting, material or level-dressing task to do live.
 ---
 
 # Solo - live in the Editor, user watching

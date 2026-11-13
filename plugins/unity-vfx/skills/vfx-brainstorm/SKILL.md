@@ -1,6 +1,6 @@
 ---
 name: vfx-brainstorm
-description: Brainstorm the look of a Unity particle or shader effect BEFORE building it - one self-contained HTML file runs 4 genuinely different directions (A/B/C/D) side by side, simulated from vfx-apply specs at the real gameplay camera and scale, with the gameplay shape drawn on the ground, beats on a timeline, an overdraw heatmap and an FSE estimate per option, bloom-off, grayscale, x5 copies and dark/bright ground toggles. The user picks or mixes in one click; the picked spec goes straight into the vfx-core build and the preview stays as the visual contract. Use whenever an effect's look is not decided yet - "brainstorm vfx", "gợi ý hiệu ứng", "cho vài option vfx", "hiệu ứng này nên trông thế nào", "làm skill/hit/aura/reveal/mưa... mà chưa có ref", "mấy hướng cho effect", "vfx ideas", "which look for this effect". Invoke with vfx-core for the brief; a UI animation made of tweens is ui-brainstorm (unity-ui) instead.
+description: Previews 4 directions for a Unity particle or shader effect in one HTML file, at the gameplay camera with the cost of each, so the user picks a look before anything is built. Use when an effect's look is undecided, e.g. "brainstorm vfx", "gợi ý hiệu ứng", "cho vài option vfx", "hiệu ứng này nên trông thế nào". UI tween motion uses ui-brainstorm.
 ---
 
 # VFX brainstorm

@@ -1,6 +1,6 @@
 ---
 name: recompile
-description: Decide how a C# change reaches the running Unity Editor in a Unity project driven through the MCP bridge. When Hot Reload is not installed, every C# edit needs a real recompile — this skill holds the recompile/play-mode workflow, the tool order, and the console verification step. Read BEFORE writing any .cs file and BEFORE calling script-update-or-create, assets-refresh, or editor-application-set-state. Trigger on every C# edit and every play-mode verification.
+description: How a C# edit reaches the running Unity Editor through the MCP bridge (recompile, play mode, console check). Use before writing any .cs file and before script-update-or-create, assets-refresh or editor-application-set-state.
 ---
 
 # Recompile workflow

@@ -197,6 +197,11 @@ claude plugin validate ./plugins/unity-ui
 claude plugin validate ./plugins/unity-vfx
 ```
 
+The validator accepts a SKILL.md `description` that strict YAML rejects, and GitHub then shows
+"Error in user YAML" on the file. Keep descriptions on one line with no `: ` and no ` #`, and keep
+each one short: one sentence on what the skill does, then "Use when..." with a few trigger phrases.
+Every description is loaded into every session; the body loads only when the skill runs.
+
 Every plugin declares a `version` (SemVer, the same number in `.claude-plugin/plugin.json` and
 `.codex-plugin/plugin.json`), and installed copies are keyed by it. A change to a plugin bumps its
 version in the same commit; without the bump, **Update** finds nothing new. Once a bumped change is

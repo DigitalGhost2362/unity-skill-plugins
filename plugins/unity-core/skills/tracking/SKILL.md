@@ -1,6 +1,6 @@
 ---
 name: tracking
-description: Quy tắc gắn analytics/Firebase tracking trong game Unity — 2 class hằng số TrackEvent & TrackParamater (2 file riêng), gọi thẳng wrapper tracking của dự án (vd TrackingManager.TrackEvent), đúng shape "event = nhóm, param value = chi tiết, KHÔNG nhét chi tiết vào key". Dùng khi thêm/sửa event tracking, dựng funnel, đếm lượt mua/chọn item, đếm bước tutorial, hoặc khi marketing báo "event trên Firebase đọc sai / không tách được".
+description: Quy tắc gắn analytics/Firebase tracking trong game Unity (class TrackEvent và TrackParamater, event là nhóm, param value là chi tiết). Dùng khi thêm hoặc sửa event tracking, dựng funnel, đếm lượt mua hay bước tutorial, hoặc khi event trên Firebase đọc sai.
 ---
 
 # Firebase / Analytics Event Tracking

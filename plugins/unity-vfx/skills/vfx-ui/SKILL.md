@@ -1,6 +1,6 @@
 ---
 name: vfx-ui
-description: UI VFX in Unity uGUI - particles and shader effects inside a Canvas - reward bursts, coin/gem fly to a counter, rarity glows and shine sweeps, button and unlock feedback, level-up and gacha reveals, popup sparkle, dissolve and transition effects. Holds how to get particles to render in a Canvas (UI particle package, camera-canvas sorting sandwich, or tween-only), UI shaders and masking, effects that keep running while the game is paused, aspect-ratio and scaler independence, rarity tier ladder, and UI overdraw. Invoke with vfx-core for any VFX that lives in the UI - "hiệu ứng UI", "particle trên UI", "coin bay", "glow item hiếm", "shine", "reward effect", "hiệu ứng mở rương". Choosing the look first: tween motion is ui-brainstorm (unity-ui), particle or glow looks are vfx-brainstorm; panel wiring is ui-panel.
+description: Particle and shader effects inside a uGUI Canvas (reward bursts, coin fly, rarity glow, shine, reveals). Use with vfx-core for any VFX in the UI, e.g. "particle trên UI", "coin bay", "glow item hiếm", "hiệu ứng mở rương". Choosing the look first goes to vfx-brainstorm or ui-brainstorm.
 ---
 
 # UI VFX

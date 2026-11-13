@@ -1,6 +1,6 @@
 ---
 name: ui-panel
-description: Mandatory workflow for ALL uGUI work in any Unity project - panels, popups, widgets, buttons, HUD elements - even small tweaks like adding a single button or label. Covers the panel lifecycle (Initialize / OpenPanel / ClosePanel), code-only button wiring, one prefab per repeated element, the anchor and pivot rules that stop layouts drifting across aspect ratios, panel parking, layering bands, tweens, the mandatory debug-button surface, and the zero-comment style. Read this on top of coding for anything that draws.
+description: Workflow for all uGUI work in a Unity project (panels, popups, widgets, buttons, HUD), even a one-button tweak. Use before adding or changing anything drawn in a Canvas, on top of coding.
 ---
 
 # Unity UI panel workflow

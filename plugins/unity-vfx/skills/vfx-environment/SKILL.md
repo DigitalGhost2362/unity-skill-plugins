@@ -1,6 +1,6 @@
 ---
 name: vfx-environment
-description: Environment VFX in Unity - ambient life (dust motes, fireflies, falling leaves, petals, butterflies), weather (rain, snow, wind, lightning), water (rivers, waterfalls, ripples, splashes, foam), fire and smoke props (torches, campfires, chimneys), fog cards, god rays, magic props and portals. Holds the rules for effects that loop forever and exist many times in a level - seamless loops, off-screen culling and distance LOD, camera-attached weather in world space, one global wind and time-of-day, vertex-animated meshes instead of particles, cheap fades for fog cards, whole-scene overdraw budget. Invoke with vfx-core for any VFX placed in a level or attached to the camera - "hiệu ứng môi trường", "mưa", "tuyết", "lá rơi", "đom đóm", "thác nước", "sương mù", "god ray", "lửa đuốc", "ambient".
+description: Environment VFX in Unity (ambient life, weather, water, fire and smoke props, fog, god rays, portals) that loops and repeats across a level. Use with vfx-core for any effect placed in a level or attached to the camera, e.g. "mưa", "tuyết", "lá rơi", "thác nước", "sương mù".
 ---
 
 # Environment VFX

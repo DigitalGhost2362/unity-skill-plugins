@@ -1,6 +1,6 @@
 ---
 name: release
-description: Git workflow for a Unity repo or UPM package. Use when asked to commit, stage, release, bump the version, update the changelog, or tag. Covers the staging allowlist, the .meta pairing check, the tilde-folder convention, the leak scan, SemVer and CHANGELOG rules, commit message style, why pushing is refused, and publishing on tag from CI.
+description: Git workflow for a Unity repo or UPM package. Use when asked to commit, stage, release, bump a version, update the changelog or tag.
 ---
 
 # Release and commit workflow
